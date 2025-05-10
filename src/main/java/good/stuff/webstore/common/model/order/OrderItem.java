@@ -1,5 +1,7 @@
 package good.stuff.webstore.common.model.order;
 
+import good.stuff.webstore.common.model.BaseEntity;
+import good.stuff.webstore.common.model.Product;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -12,19 +14,21 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class OrderItem {
+public class OrderItem extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "order_id", nullable = false)
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "order_id")
     private Order order;
 
-    private String productName;
-
-    private BigDecimal unitPrice;
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "product_id")
+    private Product product;
 
     private int quantity;
+
+    private BigDecimal unitPrice;
 }

@@ -23,6 +23,8 @@ public class Product extends BaseEntity {
 
     private String description;
 
+    private String imageUrl;
+
     private BigDecimal price;
 
     private int quantity;

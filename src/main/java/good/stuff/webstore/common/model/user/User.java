@@ -2,11 +2,14 @@ package good.stuff.webstore.common.model.user;
 
 import good.stuff.webstore.common.enums.Role;
 import good.stuff.webstore.common.model.BaseEntity;
+import good.stuff.webstore.common.model.order.Order;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.List;
 
 @Entity
 @Table(name = "users")
@@ -31,4 +34,7 @@ public class User extends BaseEntity {
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "address_id", referencedColumnName = "id")
     private UserAddress address;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<Order> orders;
 }

@@ -12,8 +12,10 @@ import java.math.BigDecimal;
 @Getter
 @Setter
 public class ProductDTO {
+    private Long id;
     private String name;
     private String description;
+    private String imageUrl;
     private BigDecimal price;
     private int quantity;
 }
