@@ -3,15 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <title>Products</title>
-  <link rel="stylesheet" th:href="@{/webjars/bootstrap/5.3.0/css/bootstrap.min.css}">
-  <link rel="stylesheet" th:href="@{/css/style.css}">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" th:href="@{/css/style.css}" />
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
 </head>
-<body>
+<body style="padding-top: 80px;">
+
+<div th:replace="fragment/navbar :: navbar"></div>
 
 <div class="container mt-4">
-  <h1 class="text-center mb-4 text-info">The Outpost Market</h1>
-
   <div class="row">
     <!-- Left filter panel -->
     <div class="col-md-3">
@@ -31,32 +31,42 @@
 
           <!-- Category selection -->
           <label for="categorySelect" class="form-label mt-3">Category</label>
-          <select class="form-select" id="categorySelect">
-            <option value="all">All</option>
-            <option value="electronics">Electronics</option>
-            <option value="books">Books</option>
-            <option value="clothing">Clothing</option>
-            <!-- Add more categories as needed -->
+          <select class="form-select" name="categoryId" id="categorySelect">
+            <option value="">All</option>
+            <option th:each="cat : ${categories}"
+                    th:value="${cat.id}"
+                    th:text="${cat.name}"
+                    th:selected="${categoryId} == ${cat.id}">
+            </option>
           </select>
         </div>
       </div>
     </div>
 
-    <!-- Product list -->
     <div class="col-md-9">
       <div class="row">
-        <div class="col-md-4 mb-4" th:each="product : ${products}">
-          <div class="product-card">
-            <img th:src="@{${product.imageUrl}}" alt="Product Image" class="img-fluid product-image">
-            <div class="product-title" th:text="${product.name}">Laser Lantern</div>
-            <p th:text="${product.description}">A rustic light source powered by dark matter fuel cells.</p>
-            <div class="product-price" th:text="'$' + ${product.price}">₡299.99</div>
-            <a th:href="@{'/cart/add/' + ${product.id}}" class="btn btn-buy mt-2">Add to Cart</a>
+        <div class="col-md-12 mb-4" th:each="product : ${products}">
+          <div class="product-card d-flex align-items-start">
+
+            <!-- Image Section -->
+            <div class="me-3">
+              <img th:src="@{${product.imageUrl}}" alt="Product Image"
+                   onerror="this.onerror=null; this.src='/images/sad.gif';"
+                   class="product-image" style="width: 150px; height: 150px; object-fit: cover; border-radius: 8px;">
+            </div>
+
+            <!-- Product Details Section -->
+            <div class="flex-grow-1">
+              <div class="product-title" th:text="${product.name}">Laser Lantern</div>
+              <p th:text="${product.description}">A rustic light source powered by dark matter fuel cells.</p>
+              <div class="product-price" th:text="'$' + ${product.price}">₡299.99</div>
+              <a th:href="@{'/cart/add/' + ${product.id}}" class="btn btn-buy mt-2">Add to Cart</a>
+            </div>
+
           </div>
         </div>
       </div>
     </div>
-  </div>
 </div>
 
 <script th:src="@{/webjars/bootstrap/5.3.0/js/bootstrap.bundle.min.js}"></script>

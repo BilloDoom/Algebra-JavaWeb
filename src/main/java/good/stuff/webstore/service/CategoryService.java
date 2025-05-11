@@ -59,20 +59,4 @@ public class CategoryService {
         }
         return false;
     }
-
-    public Category findById(Long id) {
-        return categoryRepository.findById(id).orElse(null);
-    }
-
-    public List<Category> findAll() {
-        return categoryRepository.findAll();
-    }
-
-    public void save(Category category) {
-        categoryRepository.save(category);
-    }
-
-    public void deleteById(Long id) {
-        categoryRepository.deleteById(id);
-    }
 }

@@ -10,6 +10,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -74,19 +75,11 @@ public class ProductService {
         return false;
     }
 
-    public Product findById(Long id) {
-        return productRepository.findById(id).orElse(null);
+    public List<ProductDTO> getFilteredProducts(Long categoryId, BigDecimal maxPrice) {
+        List<Product> products = productRepository.findByCategoryAndPrice(categoryId, maxPrice);
+        return products.stream()
+                .map(product -> MapperUtils.map(product, ProductDTO.class))
+                .toList();
     }
 
-    public List<Product> findAll() {
-        return productRepository.findAll();
-    }
-
-    public void save(Product category) {
-        productRepository.save(category);
-    }
-
-    public void deleteById(Long id) {
-        productRepository.deleteById(id);
-    }
 }

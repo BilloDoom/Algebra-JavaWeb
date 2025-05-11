@@ -11,6 +11,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Controller
@@ -28,11 +29,24 @@ public class ProductController {
 
     //PUBLIC
     @GetMapping
-    public String showProducts(Model model) {
-        List<ProductDTO> products = productService.getAllProducts();
+    public String showProducts(
+            @RequestParam(value = "categoryId", required = false) Long categoryId,
+            @RequestParam(value = "maxPrice", required = false) BigDecimal maxPrice,
+            Model model
+    ) {
+        List<ProductDTO> products;
+
+        if (categoryId != null || maxPrice != null) {
+            products = productService.getFilteredProducts(categoryId, maxPrice);
+        } else {
+            products = productService.getAllProducts();
+        }
+
         model.addAttribute("products", products);
+        model.addAttribute("categories", categoryService.getAllCategories());
         return "store/products";
     }
+
 
     //ADMIN
     @PreAuthorize("hasRole('ADMIN')")

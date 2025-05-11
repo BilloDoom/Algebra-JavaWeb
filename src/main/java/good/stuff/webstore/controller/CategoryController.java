@@ -9,6 +9,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Controller
 @RequestMapping("/categories")
 public class CategoryController {
@@ -20,6 +22,11 @@ public class CategoryController {
         this.categoryService = categoryService;
     }
 
+    //PUBLIC
+    @ModelAttribute("categories")
+    public List<CategoryDTO> populateCategories() {
+        return categoryService.getAllCategories();
+    }
 
     //ADMIN
     @PreAuthorize("hasRole('ADMIN')")
