@@ -9,16 +9,51 @@
 </head>
 <body>
 
-<div class="container product-container">
+<div class="container mt-4">
   <h1 class="text-center mb-4 text-info">The Outpost Market</h1>
+
   <div class="row">
-    <div class="col-md-4" th:each="product : ${products}">
-      <div class="product-card">
-        <img th:src="@{${product.imageUrl}}" alt="Product Image" class="img-fluid product-image">
-        <div class="product-title" th:text="${product.name}">Laser Lantern</div>
-        <p th:text="${product.description}">A rustic light source powered by dark matter fuel cells.</p>
-        <div class="product-price" th:text="'$' + ${product.price}">₡299.99</div>
-        <a th:href="@{'/cart/add/' + ${product.id}}" class="btn btn-buy mt-2">Add to Cart</a>
+    <!-- Left filter panel -->
+    <div class="col-md-3">
+      <div class="card mb-4">
+        <div class="card-body">
+          <h5 class="card-title">Filters</h5>
+
+          <!-- Price range -->
+          <label for="priceRange" class="form-label">Max Price: <span id="priceValue">100</span></label>
+          <input type="range" class="form-range" min="0" max="1000" value="1000" id="priceRange" oninput="priceValue.innerText = this.value">
+
+          <!-- Discount checkbox -->
+          <div class="form-check mt-3">
+            <input class="form-check-input" type="checkbox" value="" id="discountOnly">
+            <label class="form-check-label" for="discountOnly">On Discount</label>
+          </div>
+
+          <!-- Category selection -->
+          <label for="categorySelect" class="form-label mt-3">Category</label>
+          <select class="form-select" id="categorySelect">
+            <option value="all">All</option>
+            <option value="electronics">Electronics</option>
+            <option value="books">Books</option>
+            <option value="clothing">Clothing</option>
+            <!-- Add more categories as needed -->
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Product list -->
+    <div class="col-md-9">
+      <div class="row">
+        <div class="col-md-4 mb-4" th:each="product : ${products}">
+          <div class="product-card">
+            <img th:src="@{${product.imageUrl}}" alt="Product Image" class="img-fluid product-image">
+            <div class="product-title" th:text="${product.name}">Laser Lantern</div>
+            <p th:text="${product.description}">A rustic light source powered by dark matter fuel cells.</p>
+            <div class="product-price" th:text="'$' + ${product.price}">₡299.99</div>
+            <a th:href="@{'/cart/add/' + ${product.id}}" class="btn btn-buy mt-2">Add to Cart</a>
+          </div>
+        </div>
       </div>
     </div>
   </div>

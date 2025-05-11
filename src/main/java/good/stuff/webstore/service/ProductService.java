@@ -1,7 +1,9 @@
 package good.stuff.webstore.service;
 
 import good.stuff.webstore.common.dto.ProductDTO;
+import good.stuff.webstore.common.model.Category;
 import good.stuff.webstore.common.model.Product;
+import good.stuff.webstore.repository.CategoryRepository;
 import good.stuff.webstore.repository.ProductRepository;
 import good.stuff.webstore.utils.MapperUtils;
 import org.modelmapper.ModelMapper;
@@ -14,14 +16,19 @@ import java.util.Optional;
 @Service
 public class ProductService {
     private final ProductRepository productRepository;
+    private final CategoryRepository categoryRepository;
 
     @Autowired
-    public ProductService(ProductRepository productRepository) {
+    public ProductService(ProductRepository productRepository, CategoryRepository categoryRepository) {
         this.productRepository = productRepository;
+        this.categoryRepository = categoryRepository;
     }
 
     public ProductDTO createProduct(ProductDTO productDTO) {
         Product productEntity = MapperUtils.map(productDTO, Product.class);
+
+        Category category = categoryRepository.findById(productDTO.getCategoryId()).orElse(null);
+        productEntity.setCategory(category);
 
         Product savedProduct = productRepository.save(productEntity);
 
@@ -45,6 +52,9 @@ public class ProductService {
         if (existingProductOptional.isPresent()) {
             Product existingProduct = existingProductOptional.get();
 
+            Category category = categoryRepository.findById(productDTO.getCategoryId()).orElse(null);
+            existingProduct.setCategory(category);
+
             MapperUtils.mapToExisting(productDTO, existingProduct);
 
             Product updatedProduct = productRepository.save(existingProduct);
@@ -62,5 +72,21 @@ public class ProductService {
             return true;
         }
         return false;
+    }
+
+    public Product findById(Long id) {
+        return productRepository.findById(id).orElse(null);
+    }
+
+    public List<Product> findAll() {
+        return productRepository.findAll();
+    }
+
+    public void save(Product category) {
+        productRepository.save(category);
+    }
+
+    public void deleteById(Long id) {
+        productRepository.deleteById(id);
     }
 }
