@@ -37,7 +37,7 @@ public class ImageController {
     @PostMapping("/upload-image")
     public String uploadImage(@RequestParam("image") MultipartFile file, Model model) {
         try {
-            String imageUrl = imageService.uploadToSupabase(file);
+            String imageUrl = imageService.uploadToDataBase(file);
             model.addAttribute("imageUrl", imageUrl);
             return "redirect:/products";
         } catch (Exception e) {

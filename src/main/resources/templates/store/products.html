@@ -1,74 +1,111 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8">
-  <title>Products</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" th:href="@{/css/style.css}" />
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <title>Products</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
 </head>
-<body style="padding-top: 80px;">
+<body style="padding-top: 80px; padding-left: 6rem; padding-right: 6rem;">
 
 <div th:replace="fragment/navbar :: navbar"></div>
 
-<div class="container mt-4">
-  <div class="row">
+<div class="container-fluid mt-4">
+    <div class="d-grid" style="display: grid; grid-template-columns: 1fr 5fr; gap: 2rem;">
     <!-- Left filter panel -->
-    <div class="col-md-3">
-      <div class="card mb-4">
-        <div class="card-body">
-          <h5 class="card-title">Filters</h5>
+        <div style="width: 100%;">
+            <div class="card mb-4" style="background-color: #2a2a2a; border: 1px solid #444;">
+                <div class="card-body">
+                    <h5 class="card-title" style="font-family: 'Orbitron', sans-serif; font-size: 1.4rem; color: cyan;">Filters</h5>
 
-          <!-- Price range -->
-          <label for="priceRange" class="form-label">Max Price: <span id="priceValue">100</span></label>
-          <input type="range" class="form-range" min="0" max="1000" value="1000" id="priceRange" oninput="priceValue.innerText = this.value">
+                    <!-- Price range -->
+                    <label for="priceRange" class="form-label" style="font-family: 'Orbitron', sans-serif; color: #e0d8c3;">
+                        Max Price: <span id="priceValue" style="color: #7fff00;">5000</span>
+                    </label>
+                    <input type="range" class="custom-range" min="0" max="10000" value="5000" id="priceRange"
+                           oninput="priceValue.innerText = this.value">
 
-          <!-- Discount checkbox -->
-          <div class="form-check mt-3">
-            <input class="form-check-input" type="checkbox" value="" id="discountOnly">
-            <label class="form-check-label" for="discountOnly">On Discount</label>
-          </div>
 
-          <!-- Category selection -->
-          <label for="categorySelect" class="form-label mt-3">Category</label>
-          <select class="form-select" name="categoryId" id="categorySelect">
-            <option value="">All</option>
-            <option th:each="cat : ${categories}"
-                    th:value="${cat.id}"
-                    th:text="${cat.name}"
-                    th:selected="${categoryId} == ${cat.id}">
-            </option>
-          </select>
+                    <!-- Discount checkbox -->
+                    <div class="form-check mt-3">
+                        <input class="form-check-input" type="checkbox" value="" id="discountOnly" style="background-color: #1b1b1b; border-color: #555;">
+                        <label class="form-check-label" for="discountOnly" style="color: #e0d8c3;">On Discount</label>
+                    </div>
+
+                    <!-- Category selection -->
+                    <label for="categorySelect" class="form-label mt-3" style="color: #e0d8c3;">Category</label>
+                    <select class="form-select" name="categoryId" id="categorySelect" style="
+                background-color: #1b1b1b;
+                color: #e0d8c3;
+                border: 1px solid #666;
+                border-radius: 0;
+                font-family: 'Orbitron', sans-serif;
+                padding: 0.5rem;
+                transition: border-color 0.2s ease;">
+                        <option value="">All</option>
+                        <option th:each="cat : ${categories}"
+                                th:value="${cat.id}"
+                                th:text="${cat.name}"
+                                th:selected="${categoryId} == ${cat.id}">
+                        </option>
+                    </select>
+
+                    <!-- Apply Button -->
+                    <div class="d-grid mt-4">
+                        <button type="button" class="btn btn-buy">Apply Filters</button>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
+
+        <div class="col-md-9" style="width: 95%">
+            <div id="product-loader" class="d-flex justify-content-center align-items-center" style="height: 300px;">
+                <div class="spinner-border text-info" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+            <div id="product-container" class="row d-none">
+            </div>
+        </div>
     </div>
 
-    <div class="col-md-9">
-      <div class="row">
-        <div class="col-md-12 mb-4" th:each="product : ${products}">
-          <div class="product-card d-flex align-items-start">
+    <script th:src="@{/webjars/bootstrap/5.3.0/js/bootstrap.bundle.min.js}"></script>
 
-            <!-- Image Section -->
-            <div class="me-3">
-              <img th:src="@{${product.imageUrl}}" alt="Product Image"
-                   onerror="this.onerror=null; this.src='/images/sad.gif';"
-                   class="product-image" style="width: 150px; height: 150px; object-fit: cover; border-radius: 8px;">
-            </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            fetch('/api/products') // this should be your REST endpoint
+                .then(response => response.json())
+                .then(products => {
+                    const container = document.getElementById("product-container");
+                    const loader = document.getElementById("product-loader");
 
-            <!-- Product Details Section -->
-            <div class="flex-grow-1">
-              <div class="product-title" th:text="${product.name}">Laser Lantern</div>
-              <p th:text="${product.description}">A rustic light source powered by dark matter fuel cells.</p>
-              <div class="product-price" th:text="'$' + ${product.price}">₡299.99</div>
-              <a th:href="@{'/cart/add/' + ${product.id}}" class="btn btn-buy mt-2">Add to Cart</a>
-            </div>
+                    loader.classList.add("d-none");
+                    container.classList.remove("d-none");
 
-          </div>
-        </div>
-      </div>
-    </div>
-</div>
+                    products.forEach(product => {
+                        const productHTML = `
+            <div class="mb-4 w-100">
+              <div class="product-card d-flex align-items-start w-100">
+                <div class="me-3">
+                  <img src="${product.imageUrl || '/images/sad.gif'}" alt="Product Image"
+                       onerror="this.onerror=null; this.src='/images/sad.gif';"
+                       class="product-image"
+                       style="width: 150px; height: 150px; object-fit: cover; border-radius: 8px;">
+                </div>
+                <div class="flex-grow-1">
+                  <div class="product-title">${product.name}</div>
+                  <p>${product.description}</p>
+                  <div class="product-price">$${product.price}</div>
+                  <a href="/cart/add/${product.id}" class="btn btn-buy mt-2">Add to Cart</a>
+                </div>
+              </div>
+            </div>`;
+                        container.innerHTML += productHTML;
+                    });
+                });
+        });
+    </script>
 
-<script th:src="@{/webjars/bootstrap/5.3.0/js/bootstrap.bundle.min.js}"></script>
 </body>
 </html>

@@ -18,8 +18,14 @@ public class ImageService {
     @Value("${supabase.api-key}")
     private String apiKey;
 
-    @Value("${supabase.bucket-name}")
-    private String bucketName;
+    @Value("${supabase.bucket-images}")
+    private String bucketImages;
+
+    @Value("${supabase.bucket-user-profile-images}")
+    private String bucketUsers;
+
+    @Value("${supabase.bucket-category-images}")
+    private String bucketCategories;
 
     private final RestTemplate restTemplate;
 
@@ -27,9 +33,9 @@ public class ImageService {
         this.restTemplate = restTemplate;
     }
 
-    public String uploadToSupabase(MultipartFile file) throws IOException {
+    public String uploadToDataBase(MultipartFile file) throws IOException {
         String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
-        String url = supabaseUrl + "/storage/v1/object/" + bucketName + "/" + fileName;
+        String url = supabaseUrl + "/storage/v1/object/" + bucketImages + "/" + fileName;
 
         HttpHeaders headers = new HttpHeaders();
         headers.set("apikey", apiKey);
@@ -40,7 +46,7 @@ public class ImageService {
         ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.PUT, entity, String.class);
 
         if (response.getStatusCode().is2xxSuccessful()) {
-            return supabaseUrl + "/storage/v1/object/public/" + bucketName + "/" + fileName;
+            return supabaseUrl + "/storage/v1/object/public/" + bucketImages + "/" + fileName;
         } else {
             throw new RuntimeException("Failed to upload image: " + response.getStatusCode());
         }

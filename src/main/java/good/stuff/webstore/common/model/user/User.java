@@ -28,6 +28,8 @@ public class User extends BaseEntity {
 
     private String password;
 
+    private String profilePictureUrl;
+
     @Enumerated(EnumType.STRING)
     private Role role;
 

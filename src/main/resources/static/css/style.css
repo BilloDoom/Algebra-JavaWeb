@@ -73,3 +73,55 @@ body {
 .text-info {
     color: #00ffff !important;
 }
+
+
+/* Custom range slider base style */
+input[type=range].custom-range {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 6px;
+    background: #444;
+    border-radius: 3px;
+    outline: none;
+    transition: background 0.2s;
+}
+
+/* Track glow on hover */
+input[type=range].custom-range:hover {
+    background: linear-gradient(to right, cyan, #444);
+    box-shadow: 0 0 5px cyan;
+}
+
+/* Chrome & Safari thumb */
+input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: cyan;
+    cursor: pointer;
+    box-shadow: 0 0 5px cyan, 0 0 10px cyan;
+    border: 2px solid #1b1b1b;
+    transition: transform 0.2s ease;
+}
+
+input[type=range]:hover::-webkit-slider-thumb {
+    transform: scale(1.2);
+}
+
+/* Firefox thumb */
+input[type=range]::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: cyan;
+    border: 2px solid #1b1b1b;
+    cursor: pointer;
+    box-shadow: 0 0 5px cyan, 0 0 10px cyan;
+    transition: transform 0.2s ease;
+}
+
+input[type=range]:hover::-moz-range-thumb {
+    transform: scale(1.2);
+}

@@ -1,7 +1,6 @@
 package good.stuff.webstore.controller;
 
 import good.stuff.webstore.common.dto.CategoryDTO;
-import good.stuff.webstore.common.model.Category;
 import good.stuff.webstore.service.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -33,14 +32,14 @@ public class CategoryController {
     @GetMapping("/admin")
     public String adminDashboard(Model model) {
         model.addAttribute("categories", categoryService.getAllCategories());
-        return "admin/categories";
+        return "admin/admin-categories";
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/admin/edit/{id}")
     public String editCategoryForm(@PathVariable Long id, Model model) {
         model.addAttribute("category", categoryService.getCategoryById(id).orElse(new CategoryDTO()));
-        return "admin/edit_category";
+        return "admin/category-form";
     }
 
     @PreAuthorize("hasRole('ADMIN')")

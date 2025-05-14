@@ -23,4 +23,6 @@ public class Category extends BaseEntity {
 
     @OneToMany(mappedBy = "category")
     private List<Product> products;
+
+    private List<String> imageUrls;
 }

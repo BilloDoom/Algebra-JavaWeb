@@ -20,6 +20,8 @@ public class UserService {
     public void registerUser(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(user);
+
+        System.out.println(userRepository.findAll());
     }
 
     public boolean existsByUsername(String username) {

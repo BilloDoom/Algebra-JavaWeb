@@ -1,8 +1,6 @@
 package good.stuff.webstore.controller;
 
 import good.stuff.webstore.common.dto.ProductDTO;
-import good.stuff.webstore.common.model.Category;
-import good.stuff.webstore.common.model.Product;
 import good.stuff.webstore.service.CategoryService;
 import good.stuff.webstore.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,9 +8,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-
-import java.math.BigDecimal;
-import java.util.List;
 
 @Controller
 @RequestMapping("/products")
@@ -29,20 +24,7 @@ public class ProductController {
 
     //PUBLIC
     @GetMapping
-    public String showProducts(
-            @RequestParam(value = "categoryId", required = false) Long categoryId,
-            @RequestParam(value = "maxPrice", required = false) BigDecimal maxPrice,
-            Model model
-    ) {
-        List<ProductDTO> products;
-
-        if (categoryId != null || maxPrice != null) {
-            products = productService.getFilteredProducts(categoryId, maxPrice);
-        } else {
-            products = productService.getAllProducts();
-        }
-
-        model.addAttribute("products", products);
+    public String showProducts(Model model) {
         model.addAttribute("categories", categoryService.getAllCategories());
         return "store/products";
     }
@@ -51,10 +33,9 @@ public class ProductController {
     //ADMIN
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/admin")
-    public String adminDashboard(Model model) {
+    public String showAdminProductPage(Model model) {
         model.addAttribute("products", productService.getAllProducts());
-        model.addAttribute("categories", categoryService.getAllCategories());
-        return "admin/products";
+        return "admin/admin-products";
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -62,7 +43,7 @@ public class ProductController {
     public String editProductForm(@PathVariable Long id, Model model) {
         model.addAttribute("product", productService.getProductById(id).orElse(new ProductDTO()));
         model.addAttribute("categories", categoryService.getAllCategories());
-        return "admin/edit_product";
+        return "admin/product-form";
     }
 
     @PreAuthorize("hasRole('ADMIN')")
