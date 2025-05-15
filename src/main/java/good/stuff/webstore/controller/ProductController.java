@@ -31,12 +31,14 @@ public class ProductController {
 
 
     //ADMIN
-    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/admin")
+    @PreAuthorize("hasRole('ADMIN')")
     public String showAdminProductPage(Model model) {
         model.addAttribute("products", productService.getAllProducts());
+        model.addAttribute("categories", categoryService.getAllCategories());
         return "admin/admin-products";
     }
+
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/admin/edit/{id}")

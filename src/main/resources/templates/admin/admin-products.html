@@ -4,29 +4,127 @@
     <title>Admin - Products</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
 </head>
-<body>
+<body class="bg-dark text-light" style="font-family: 'Courier New', monospace;">
+
+<div th:replace="fragment/navbar :: navbar"></div>
+
 <div class="container mt-5">
-    <h2>Manage Products</h2>
-    <a th:href="@{/products/admin/edit/0}" class="btn btn-primary mb-3">Add Product</a>
-    <table class="table table-bordered">
+    <h2 class="text-info" style="font-family: 'Orbitron', sans-serif;">Manage Products</h2>
+
+    <!-- Add Product Button -->
+    <button class="btn btn-buy mb-3"
+            data-bs-toggle="modal"
+            data-bs-target="#productModal"
+            onclick="openProductModal(null)">
+        + Add Product
+    </button>
+
+    <table class="table table-dark table-striped table-bordered">
         <thead>
         <tr>
-            <th>ID</th><th>Name</th><th>Price</th><th>Category</th><th>Actions</th>
+            <th>ID</th><th>Name</th><th>Price</th><th>Quantity</th><th>Category</th><th>Actions</th>
         </tr>
         </thead>
         <tbody>
         <tr th:each="product : ${products}">
             <td th:text="${product.id}">1</td>
             <td th:text="${product.name}">Example</td>
-            <td th:text="${product.price}">100</td>
+            <td th:text="${product.price}">100.00</td>
+            <td th:text="${product.quantity}">10</td>
             <td th:text="${product.category.name}">Category A</td>
             <td>
-                <a th:href="@{'/products/admin/edit/' + ${product.id}}" class="btn btn-sm btn-warning">Edit</a>
-                <a th:href="@{'/products/admin/delete/' + ${product.id}}" class="btn btn-sm btn-danger">Delete</a>
+                <!-- Edit -->
+                <button class="btn btn-sm btn-warning"
+                        data-bs-toggle="modal"
+                        data-bs-target="#productModal"
+                        th:onclick="'openProductModal(' + ${product.id} + ')'">
+                    Edit
+                </button>
+
+                <!-- Delete -->
+                <a th:href="@{'/products/admin/delete/' + ${product.id}}"
+                   class="btn btn-sm btn-danger">Delete</a>
             </td>
         </tr>
         </tbody>
     </table>
 </div>
+
+<!-- Product Modal -->
+<div class="modal fade" id="productModal" tabindex="-1" aria-labelledby="productModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <form id="productForm" class="modal-content bg-dark text-light" method="post">
+            <div class="modal-header">
+                <h5 class="modal-title text-info" id="productModalLabel" style="font-family: 'Orbitron', sans-serif;">Product</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" name="id" id="product-id">
+                <div class="mb-3">
+                    <label for="product-name" class="form-label">Name</label>
+                    <input type="text" name="name" id="product-name" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label for="product-description" class="form-label">Description</label>
+                    <textarea name="description" id="product-description" class="form-control"></textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="product-price" class="form-label">Price</label>
+                    <input type="number" name="price" id="product-price" class="form-control" step="0.01" required>
+                </div>
+                <div class="mb-3">
+                    <label for="product-quantity" class="form-label">Quantity</label>
+                    <input type="number" name="quantity" id="product-quantity" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label for="product-category" class="form-label">Category</label>
+                    <select name="categoryId" id="product-category" class="form-select" required>
+                        <option th:each="cat : ${categories}"
+                                th:value="${cat.id}"
+                                th:text="${cat.name}">
+                        </option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-buy">Save</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    const productData = /*[[${products}]]*/ [];
+
+    function openProductModal(productId) {
+        const form = document.getElementById('productForm');
+        const modalTitle = document.getElementById('productModalLabel');
+
+        if (productId === null) {
+            // New product
+            form.action = '/products/admin/add';
+            modalTitle.innerText = 'Add Product';
+            form.reset();
+            return;
+        }
+
+        // Edit product
+        const product = productData.find(p => p.id === productId);
+        if (!product) return;
+
+        form.action = '/products/admin/edit';
+        modalTitle.innerText = 'Edit Product';
+
+        document.getElementById('product-id').value = product.id;
+        document.getElementById('product-name').value = product.name;
+        document.getElementById('product-description').value = product.description;
+        document.getElementById('product-price').value = product.price;
+        document.getElementById('product-quantity').value = product.quantity;
+        document.getElementById('product-category').value = product.category.id;
+    }
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
