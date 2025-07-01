@@ -22,6 +22,7 @@ public class CategoryService {
 
     public CategoryDTO createCategory(CategoryDTO categoryDTO) {
         Category categoryEntity = MapperUtils.map(categoryDTO, Category.class);
+        categoryEntity.setId(null);
         Category savedCategory = categoryRepository.save(categoryEntity);
         return MapperUtils.map(savedCategory, CategoryDTO.class);
     }

@@ -19,4 +19,5 @@ public class ProductDTO {
     private BigDecimal price;
     private int quantity;
     private Long categoryId;
+    private String categoryName;
 }

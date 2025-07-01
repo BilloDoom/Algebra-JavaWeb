@@ -40,7 +40,13 @@ public class ProductService {
     public List<ProductDTO> getAllProducts() {
         List<Product> products = productRepository.findAll();
         return products.stream()
-                .map(product -> MapperUtils.map(product, ProductDTO.class))
+                .map(product -> {
+                    ProductDTO dto = MapperUtils.map(product, ProductDTO.class);
+                    if (product.getCategory() != null) {
+                        dto.setCategoryName(product.getCategory().getName());
+                    }
+                    return dto;
+                })
                 .toList();
     }
 

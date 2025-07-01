@@ -32,7 +32,12 @@
             <td th:text="${category.name}">Category A</td>
             <td>
                 <!-- Edit -->
-                <button class="edit-btn" data-category-name="${category.name}">
+                <button type="button"
+                        class="btn btn-sm btn-primary"
+                        data-bs-toggle="modal"
+                        data-bs-target="#categoryModal"
+                        th:attr="data-id=${category.id}, data-name=${category.name}"
+                        onclick="openCategoryModal(this.getAttribute('data-id'), this.getAttribute('data-name'))">
                     Edit
                 </button>
 
@@ -52,7 +57,10 @@
 <!-- Modal Form -->
 <div class="modal fade" id="categoryModal" tabindex="-1" aria-labelledby="categoryModalLabel" aria-hidden="true">
     <div class="modal-dialog">
-        <form id="categoryForm" class="modal-content bg-dark text-light" method="post">
+        <form id="categoryForm"
+              class="modal-content bg-dark text-light"
+              method="post"
+              th:action="@{/categories/admin/add}">
             <div class="modal-header">
                 <h5 class="modal-title text-info" id="categoryModalLabel" style="font-family: 'Orbitron', sans-serif;">Category</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
@@ -73,18 +81,13 @@
 </div>
 
 <script>
-    document.querySelectorAll('.edit-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const name = btn.dataset.categoryName;
-            console.log('Edit category:', name);
-        });
-    });
-
     function openCategoryModal(id, name) {
         const form = document.getElementById('categoryForm');
-        form.action = id ? '/categories/admin/edit' : '/categories/admin/add';
+        const categoryIdInput = document.getElementById('category-id');
 
-        document.getElementById('category-id').value = id || '';
+        form.action = id ? '/categories/admin/edit' : '/categories/admin/add';
+        categoryIdInput.value = id || '';
+        categoryIdInput.disabled = !id; // Prevent it from being submitted if empty
         document.getElementById('category-name').value = name || '';
         document.getElementById('categoryModalLabel').innerText = id ? 'Edit Category' : 'Add Category';
     }

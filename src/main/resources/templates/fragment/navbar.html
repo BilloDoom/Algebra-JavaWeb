@@ -36,6 +36,34 @@
                         </ul>
                     </li>
 
+                    <!-- Cart - Always visible -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link position-relative dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+
+                            <img src="/icons/bag.png" alt="Cart" style="height: 1.5rem;">
+
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                                  th:text="${cart != null ? cart.size() : 0}">0</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end p-3" style="min-width: 300px;">
+                            <div th:if="${cart == null or cart.isEmpty()}">
+                                <span class="text-muted">Your cart is empty</span>
+                            </div>
+                            <div th:if="${cart != null and !cart.isEmpty()}">
+                                <li th:each="item : ${cart}">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span th:text="${item.name}">Product</span>
+                                        <span class="badge bg-secondary" th:text="${item.quantity}">1</span>
+                                    </div>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <a th:href="@{/cart}" class="btn btn-primary w-100 btn-sm">View Cart</a>
+                                </li>
+                            </div>
+                        </ul>
+                    </li>
+
                     <!-- Authenticated user -->
                     <li class="nav-item d-flex align-items-center" sec:authorize="isAuthenticated()">
                         <a class="nav-link p-0" href="#">
