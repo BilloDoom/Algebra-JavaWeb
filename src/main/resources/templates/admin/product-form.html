@@ -8,7 +8,9 @@
 <div class="container mt-5">
     <h2 th:text="${product.id} != null ? 'Edit Product' : 'Add Product'"></h2>
 
-    <form th:action="@{${product.id} != null ? '/products/admin/edit' : '/products/admin/add'}" method="post">
+    <form th:action="@{${product.id} != null ? '/products/admin/edit' : '/products/admin/add'}"
+          method="post"
+          enctype="multipart/form-data">
         <input type="hidden" th:field="*{id}"/>
         <div class="mb-3">
             <label class="form-label">Name</label>
@@ -32,6 +34,10 @@
                 <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.name}"
                         th:selected="${cat.id} == ${product.categoryId}"></option>
             </select>
+        </div>
+        <div class="mb-3">
+            <label for="product-image" class="form-label">Image</label>
+            <input type="file" name="image" id="product-image" class="form-control">
         </div>
         <button type="submit" class="btn btn-primary">Save</button>
     </form>

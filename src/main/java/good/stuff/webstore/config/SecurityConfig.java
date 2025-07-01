@@ -1,5 +1,6 @@
 package good.stuff.webstore.config;
 
+import good.stuff.webstore.handler.CustomLogoutHandler;
 import good.stuff.webstore.service.user.CustomUserDetailsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,15 +19,18 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 
+    private final CustomLogoutHandler customLogoutHandler;
     private final CustomUserDetailsService userDetailsService;
 
-    public SecurityConfig(CustomUserDetailsService userDetailsService) {
+    public SecurityConfig(CustomLogoutHandler customLogoutHandler, CustomUserDetailsService userDetailsService) {
+        this.customLogoutHandler = customLogoutHandler;
         this.userDetailsService = userDetailsService;
     }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
+                .csrf(csrf -> csrf.disable())  // Disable CSRF here
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/", "/index", "/products", "/products/**", "/css/**", "/js/**", "/images/**", "/register", "/login", "/cart/**").permitAll()
                         .requestMatchers("/admin/**", "/products/admin/**").hasRole("ADMIN")
@@ -41,6 +45,7 @@ public class SecurityConfig {
                 .logout(logout -> logout
                         .logoutUrl("/logout")
                         .logoutSuccessUrl("/")
+                        .addLogoutHandler(customLogoutHandler)
                         .permitAll()
                 )
                 .exceptionHandling(ex -> ex
@@ -49,6 +54,7 @@ public class SecurityConfig {
                 .userDetailsService(userDetailsService)
                 .build();
     }
+
 
     @Bean
     public PasswordEncoder passwordEncoder() {

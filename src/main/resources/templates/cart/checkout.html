@@ -1,12 +1,213 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
+    <meta charset="UTF-8"/>
     <title>Checkout</title>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/css/bootstrap.min.css}"/>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+    <script src="https://www.paypal.com/sdk/js?client-id=AQ2ByBtWUqWORMonUwblwgL-oEpaOvqvhn50n7l4MGT1YnPgo6KTimOqNXD8wV-gIxb-gKNsf_uuiTnE&currency=EUR&disable-funding=card"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css"
+          integrity="sha512-xh6E6bC5kM8XQvcy9OvDyIQ3dS++LX+sCUeVPn4EnT5UcPRFk8T7N50EnWTRDwo5KTdKym4l4P2Np0WxZ9W5Fw=="
+          crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
-<body>
-<div class="container mt-5">
-    <h2>Checkout</h2>
-    <p>Checkout processing goes here.</p>
+<style>
+    #cashButton:hover {
+        transform: scale(1.05);
+        background: linear-gradient(135deg, #5a9d94, #3c7b72);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    }
+</style>
+
+<body class="bg-light">
+<div th:replace="fragments/navbar :: navbar"></div>
+
+<div class="container my-5">
+    <div class="card shadow">
+        <div class="card-header text-white" style="background-color: #93B0AC;">
+            <h3 class="mb-0">Checkout</h3>
+        </div>
+        <div class="card-body">
+            <h4 class="mb-4">Order Summary</h4>
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead class="table-light">
+                    <tr>
+                        <th>Product</th>
+                        <th>Quantity</th>
+                        <th>Price</th>
+                        <th>Total</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="item : ${cartItems}">
+                        <td th:text="${item.product.name}"></td>
+                        <td th:text="${item.quantity}"></td>
+                        <td th:text="${item.product.price} + ' €'"></td>
+                        <td th:text="${item.product.price * item.quantity} + ' €'"></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="text-end mb-4">
+                <h4 class="fw-bold">Grand Total: <span th:text="${grandTotal} + ' €'"></span></h4>
+            </div>
+            <hr/>
+            <h4 class="mb-3 text-center">Payment Options</h4>
+            <div class="d-flex flex-column align-items-center mb-4">
+                <div id="paypal-button-container" style="max-width: 500px; width: 100%;"></div>
+            </div>
+            <div class="mb-4" style="max-width: 500px; width: 100%; margin: 0 auto;">
+                <button id="cashButton" type="button" class="btn btn-lg px-5 py-3 shadow-sm text-white w-100"
+                        style="background: linear-gradient(135deg, #88c9bf, #5a9d94); border: none; border-radius: 12px; font-size: 18px; font-weight: 500; transition: all 0.3s ease;">
+                    <i class="fas fa-money-bill-wave me-2"></i> Pay with Cash
+                </button>
+            </div>
+        </div>
+    </div>
 </div>
+
+<script th:src="@{/webjars/bootstrap/js/bootstrap.bundle.min.js}" defer></script>
+
+<script th:inline="javascript">
+    paypal.Buttons({
+        style: {
+            layout: 'vertical',
+            color: 'blue',
+            shape: 'rect',
+            label: 'paypal',
+            size: 'responsive'
+        },
+        createOrder: function(data, actions) {
+            return actions.order.create({
+                purchase_units: [{
+                    amount: {
+                        value: /*[[${grandTotal}]]*/ "10.00"
+                    }
+                }]
+            });
+        },
+        onApprove: function(data, actions) {
+            return actions.order.capture().then(function(details) {
+                fetch('/checkout/submit', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: new URLSearchParams({
+                        paymentMethod: 'PAYPAL'
+                    })
+                })
+                    .then(response => {
+                        if (response.ok) {
+                            return response.text();
+                        } else {
+                            throw new Error('Order save failed');
+                        }
+                    })
+                    .then(data => {
+                        Swal.fire({
+                            width: '800px',
+                            html: '<h2 style="text-align: center; margin-bottom: 20px;">Order Confirmed</h2>' +
+                                '<img src="https://media.tenor.com/1SXIh2VpnhQAAAAi/cat.gif" alt="Order Confirmed" style="display: block; margin: 0 auto; max-width: 100%;"/>' +
+                                '<div style="margin-top: 20px; display: flex; justify-content: center; gap: 10px;">' +
+                                '<button id="viewOrderBtn" type="button" class="btn btn-outline-secondary" style="padding: 10px 20px; font-size: 16px;"><i class="fas fa-eye"></i> View My Order</button>' +
+                                '<button id="continueShoppingBtn" type="button" class="btn" style="background-color: #93B0AC; color: white; padding: 10px 20px; font-size: 16px;">Continue Shopping</button>' +
+                                '</div>',
+                            showConfirmButton: false,
+                            allowOutsideClick: false
+                        });
+
+                        document.addEventListener('click', function(event) {
+                            if (event.target && event.target.id === 'viewOrderBtn') {
+                                window.location.href = '/users/profile/orders';
+                            }
+                            if (event.target && event.target.id === 'continueShoppingBtn') {
+                                window.location.href = '/shop';
+                            }
+                        }, { once: true });
+                    })
+                    .catch(error => {
+                        console.error(error);
+                        Swal.fire({
+                            title: 'Error saving order',
+                            text: error.message,
+                            icon: 'error'
+                        });
+                    });
+            });
+        }
+    }).render('#paypal-button-container');
+
+    document.getElementById("cashButton").addEventListener("click", function() {
+        Swal.fire({
+            title: 'Enter Order Details',
+            html:
+                '<input id="customerName" class="swal2-input" placeholder="Name">' +
+                '<textarea id="customerAddress" class="swal2-textarea" placeholder="Address"></textarea>',
+            showCancelButton: true,
+            confirmButtonText: 'Place Order',
+            focusConfirm: false,
+            preConfirm: () => {
+                const customerName = document.getElementById('customerName').value;
+                const customerAddress = document.getElementById('customerAddress').value;
+                if (!customerName || !customerAddress) {
+                    Swal.showValidationMessage('Please enter both name and address');
+                }
+                return { customerName: customerName, customerAddress: customerAddress };
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch('/checkout/submit', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: new URLSearchParams({
+                        customerName: result.value.customerName,
+                        customerAddress: result.value.customerAddress,
+                        paymentMethod: 'CASH'
+                    })
+                })
+                    .then(response => {
+                        if (response.ok) {
+                            return response.text();
+                        } else {
+                            throw new Error('Order save failed');
+                        }
+                    })
+                    .then(data => {
+                        Swal.fire({
+                            width: '800px',
+                            html: '<h2 style="text-align: center; margin-bottom: 20px;">Order Confirmed</h2>' +
+                                '<img src="https://media.tenor.com/1SXIh2VpnhQAAAAi/cat.gif" alt="Order Confirmed" style="display: block; margin: 0 auto; max-width: 100%;"/>' +
+                                '<div style="margin-top: 20px; display: flex; justify-content: center; gap: 10px;">' +
+                                '<button id="viewOrderBtn" type="button" class="btn btn-outline-secondary" style="padding: 10px 20px; font-size: 16px;"><i class="fas fa-eye"></i> View My Order</button>' +
+                                '<button id="continueShoppingBtn" type="button" class="btn" style="background-color: #93B0AC; color: white; padding: 10px 20px; font-size: 16px;">Continue Shopping</button>' +
+                                '</div>',
+                            showConfirmButton: false,
+                            allowOutsideClick: false
+                        });
+                        document.addEventListener('click', function(event) {
+                            if (event.target && event.target.id === 'viewOrderBtn') {
+                                window.location.href = '/users/profile/orders';
+                            }
+                            if (event.target && event.target.id === 'continueShoppingBtn') {
+                                window.location.href = '/products/listProducts';
+                            }
+                        }, { once: true });
+                    })
+                    .catch(error => {
+                        console.error(error);
+                        Swal.fire({
+                            title: 'Error saving order',
+                            text: error.message,
+                            icon: 'error'
+                        });
+                    });
+            }
+        });
+    });
+</script>
 </body>
 </html>

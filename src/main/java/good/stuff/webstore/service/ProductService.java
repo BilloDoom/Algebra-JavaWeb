@@ -31,6 +31,7 @@ public class ProductService {
 
         Category category = categoryRepository.findById(productDTO.getCategoryId()).orElse(null);
         productEntity.setCategory(category);
+        productEntity.setId(null);
 
         Product savedProduct = productRepository.save(productEntity);
 

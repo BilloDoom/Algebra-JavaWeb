@@ -7,6 +7,10 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.UUID;
 
 @Service
@@ -31,6 +35,30 @@ public class ImageService {
 
     public ImageService(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
+    }
+
+    private static final String UPLOAD_DIR = "src/main/resources/static/uploads/";
+
+    public String uploadToDataBaseLocal(MultipartFile file) throws IOException {
+        if (file.isEmpty()) {
+            throw new IllegalArgumentException("Cannot upload empty file.");
+        }
+
+        // Ensure the uploads directory exists
+        Path uploadPath = Paths.get(UPLOAD_DIR);
+        if (Files.notExists(uploadPath)) {
+            Files.createDirectories(uploadPath);
+        }
+
+        // Generate unique filename
+        String uniqueFileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+        Path targetPath = uploadPath.resolve(uniqueFileName);
+
+        // Save the file to the local path
+        Files.copy(file.getInputStream(), targetPath, StandardCopyOption.REPLACE_EXISTING);
+
+        // Return relative path used by frontend (e.g., for <img src="...">)
+        return "/uploads/" + uniqueFileName;
     }
 
     public String uploadToDataBase(MultipartFile file) throws IOException {

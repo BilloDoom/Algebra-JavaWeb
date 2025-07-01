@@ -24,16 +24,6 @@ public class ImageController {
         this.imageService = imageService;
     }
 
-    @PostMapping("/upload/local")
-    public String uploadImageLocal(@RequestParam("image") MultipartFile file) throws IOException {
-        if (!file.isEmpty()) {
-            String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
-            Path imagePath = Paths.get("src/main/resources/static/images/local" + fileName);
-            Files.copy(file.getInputStream(), imagePath, StandardCopyOption.REPLACE_EXISTING);
-        }
-        return "redirect:/products";
-    }
-
     @PostMapping("/upload-image")
     public String uploadImage(@RequestParam("image") MultipartFile file, Model model) {
         try {
