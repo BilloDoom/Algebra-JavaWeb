@@ -29,8 +29,7 @@ public class CartItem {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof CartItem)) return false;
-        CartItem other = (CartItem) o;
+        if (!(o instanceof CartItem other)) return false;
         return this.product.getId().equals(other.product.getId());
     }
 

@@ -15,14 +15,6 @@ body {
 }
 
 /* Card Layout */
-.product-card {
-    background: #2a2a2a;
-    border: 1px solid #444;
-    padding: 15px;
-    margin: 15px;
-    box-shadow: 0 0 15px rgba(0, 255, 170, 0.15);
-    transition: transform 0.2s ease;
-}
 
 .product-card:hover {
     transform: scale(1.02);
@@ -30,21 +22,49 @@ body {
 }
 
 /* Product Elements */
-.product-image {
-    max-height: 180px;
-    object-fit: cover;
-    border-radius: 8px;
-    margin-bottom: 10px;
-}
 
 .product-title {
     font-family: 'Orbitron', sans-serif;
     font-size: 1.2rem;
 }
 
+/* Grid layout for product display */
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2rem;
+}
+
+/* Make product image span full card width and be taller */
+.product-image {
+    width: 100%;
+    max-height: 220px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 15px;
+}
+
+/* Adjust product card height */
+.product-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+    min-height: 420px; /* taller card */
+}
+
+/* Price styling with enhanced theme look */
 .product-price {
-    font-size: 1rem;
+    font-size: 1.1rem;
+    font-family: 'Orbitron', sans-serif;
     color: #7fff00;
+    background-color: #1b1b1b;
+    border: 1px solid #444;
+    padding: 0.4rem 0.75rem;
+    width: fit-content;
+    border-radius: 6px;
+    margin-top: 10px;
+    box-shadow: 0 0 10px rgba(127, 255, 0, 0.2);
 }
 
 /* Buttons */
@@ -124,4 +144,49 @@ input[type=range]::-moz-range-thumb {
 
 input[type=range]:hover::-moz-range-thumb {
     transform: scale(1.2);
+}
+
+/* Address cards styling */
+.address-card p {
+    margin-bottom: 0.3rem;
+    color: #e0d8c3;
+    font-size: 0.9rem;
+}
+
+/* Add New Address button */
+.btn-cyan {
+    background-color: cyan;
+    color: black;
+    font-weight: bold;
+    border-radius: 0;
+    font-family: 'Orbitron', sans-serif;
+    padding: 0.5rem 1rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    text-decoration: underline;
+    text-decoration-thickness: 3px;
+    transition: all 0.2s ease-in-out;
+    border: none;
+    cursor: pointer;
+    display: inline-block;
+}
+
+.btn-cyan:hover {
+    background-color: black;
+    color: cyan;
+    text-decoration-color: cyan;
+}
+
+/* Buttons inside address cards */
+.btn-outline-info.btn-sm,
+.btn-outline-danger.btn-sm {
+    font-family: 'Orbitron', sans-serif;
+    letter-spacing: 1px;
+    border-radius: 0;
+    padding: 0.25rem 0.75rem;
+}
+
+/* Maintain spacing for flex gap on address buttons container */
+.address-card .d-flex.gap-2 {
+    gap: 0.5rem;
 }

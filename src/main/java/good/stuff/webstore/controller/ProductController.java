@@ -57,7 +57,8 @@ public class ProductController {
 
         if (!imageFile.isEmpty()) {
             try {
-                String imageUrl = imageService.uploadToDataBaseLocal(imageFile);
+                //String imageUrl = imageService.uploadToDataBaseLocal(imageFile);
+                String imageUrl = imageService.uploadToMinio(imageFile);
                 productDTO.setImageUrl(imageUrl);
             } catch (IOException e) {
                 throw new RuntimeException("Failed to upload image", e);
@@ -78,7 +79,8 @@ public class ProductController {
 
         if (imageFile != null && !imageFile.isEmpty()) {
             try {
-                String imageUrl = imageService.uploadToDataBaseLocal(imageFile);
+                //String imageUrl = imageService.uploadToDataBaseLocal(imageFile);
+                String imageUrl = imageService.uploadToMinio(imageFile);
                 productDTO.setImageUrl(imageUrl);
             } catch (IOException e) {
                 throw new RuntimeException("Failed to upload image", e);

@@ -3,6 +3,7 @@ package good.stuff.webstore.common.model.order;
 import good.stuff.webstore.common.enums.OrderStatus;
 import good.stuff.webstore.common.model.BaseEntity;
 import good.stuff.webstore.common.model.user.User;
+import good.stuff.webstore.common.model.user.UserAddress;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -34,5 +35,6 @@ public class Order extends BaseEntity {
 
     private BigDecimal totalAmount;
 
+    @Column(name = "shipping_address", length = 1000)
     private String shippingAddress;
 }
