@@ -27,4 +27,17 @@ public class UserAddress extends BaseEntity {
     private String zip;
 
     private String country;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+
+    public String formatAddress() {
+        return String.format("%s, %s, %s, %s, %s",
+                street,
+                city,
+                state,
+                zip,
+                country);
+    }
 }

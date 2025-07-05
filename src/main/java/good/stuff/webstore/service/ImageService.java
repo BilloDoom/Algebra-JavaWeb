@@ -1,5 +1,10 @@
 package good.stuff.webstore.service;
 
+import io.minio.BucketExistsArgs;
+import io.minio.MakeBucketArgs;
+import io.minio.MinioClient;
+import io.minio.PutObjectArgs;
+import io.minio.errors.MinioException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -11,6 +16,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.UUID;
 
 @Service
@@ -33,8 +40,53 @@ public class ImageService {
 
     private final RestTemplate restTemplate;
 
-    public ImageService(RestTemplate restTemplate) {
+    private final MinioClient minioClient;
+
+    @Value("${minio.bucket-name}")
+    private String minioBucketName;
+
+    @Value("${minio.endpoint}")
+    private String minioEndpoint;
+
+    public ImageService(RestTemplate restTemplate, MinioClient minioClient) {
         this.restTemplate = restTemplate;
+        this.minioClient = minioClient;
+    }
+
+    public String uploadToMinio(MultipartFile file) throws IOException {
+        if (file.isEmpty()) {
+            throw new IllegalArgumentException("Cannot upload empty file.");
+        }
+
+        try {
+            boolean found = minioClient.bucketExists(BucketExistsArgs.builder()
+                    .bucket(minioBucketName)
+                    .build());
+
+            if (!found) {
+                minioClient.makeBucket(MakeBucketArgs.builder()
+                        .bucket(minioBucketName)
+                        .build());
+            }
+
+            String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+
+            minioClient.putObject(
+                    PutObjectArgs.builder()
+                            .bucket(minioBucketName)
+                            .object(fileName)
+                            .stream(file.getInputStream(), file.getSize(), -1)
+                            .contentType(file.getContentType())
+                            .build()
+            );
+
+            String endpoint = minioEndpoint.endsWith("/") ? minioEndpoint.substring(0, minioEndpoint.length() - 1) : minioEndpoint;
+
+            return endpoint + "/" + minioBucketName + "/" + fileName;
+
+        } catch (MinioException | InvalidKeyException | NoSuchAlgorithmException e) {
+            throw new RuntimeException("Error occurred while uploading to MinIO", e);
+        }
     }
 
     private static final String UPLOAD_DIR = "src/main/resources/static/uploads/";

@@ -1,3 +1,5 @@
+<!-- Updated product page HTML -->
+
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
@@ -13,7 +15,7 @@
 
 <div class="container-fluid mt-4">
     <div class="d-grid" style="display: grid; grid-template-columns: 1fr 5fr; gap: 2rem;">
-        <!-- Left filter panel -->
+        <!-- Filter panel -->
         <div style="width: 100%;">
             <div class="card mb-4" style="background-color: #2a2a2a; border: 1px solid #444;">
                 <div class="card-body">
@@ -32,16 +34,16 @@
                         <label class="form-check-label" for="discountOnly" style="color: #e0d8c3;">On Discount</label>
                     </div>
 
-                    <!-- Category selection -->
+                    <!-- Category select -->
                     <label for="categorySelect" class="form-label mt-3" style="color: #e0d8c3;">Category</label>
                     <select class="form-select" name="categoryId" id="categorySelect" style="
-                background-color: #1b1b1b;
-                color: #e0d8c3;
-                border: 1px solid #666;
-                border-radius: 0;
-                font-family: 'Orbitron', sans-serif;
-                padding: 0.5rem;
-                transition: border-color 0.2s ease;">
+                        background-color: #1b1b1b;
+                        color: #e0d8c3;
+                        border: 1px solid #666;
+                        border-radius: 0;
+                        font-family: 'Orbitron', sans-serif;
+                        padding: 0.5rem;
+                        transition: border-color 0.2s ease;">
                         <option value="">All</option>
                         <option th:each="cat : ${categories}"
                                 th:value="${cat.id}"
@@ -50,7 +52,7 @@
                         </option>
                     </select>
 
-                    <!-- Apply Button -->
+                    <!-- Apply button -->
                     <div class="d-grid mt-4">
                         <button type="button" class="btn btn-buy">Apply Filters</button>
                     </div>
@@ -58,14 +60,15 @@
             </div>
         </div>
 
+        <!-- Product grid area -->
         <div class="col-md-9" style="width: 95%">
             <div id="product-loader" class="d-flex justify-content-center align-items-center" style="height: 300px;">
                 <div class="spinner-border text-info" role="status">
                     <span class="visually-hidden">Loading...</span>
                 </div>
             </div>
-            <div id="product-container" class="row d-none">
-                <!-- Products will be inserted here -->
+            <div id="product-container" class="product-grid d-none">
+                <!-- JS inserts products here -->
             </div>
         </div>
     </div>
@@ -75,7 +78,7 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-        fetch('/api/products') // Fetch product list (adjust if needed)
+        fetch('/api/products')
             .then(response => response.json())
             .then(products => {
                 const container = document.getElementById("product-container");
@@ -83,32 +86,25 @@
 
                 loader.classList.add("d-none");
                 container.classList.remove("d-none");
-                container.innerHTML = ''; // clear existing content
+                container.innerHTML = '';
 
                 products.forEach(product => {
                     const productHTML = `
-          <div class="mb-4 w-100">
-            <div class="product-card d-flex align-items-start w-100">
-              <div class="me-3">
-                <img src="${product.imageUrl || '/images/sad.gif'}" alt="Product Image"
-                     onerror="this.onerror=null; this.src='/images/sad.gif';"
-                     class="product-image"
-                     style="width: 150px; height: 150px; object-fit: cover; border-radius: 8px;">
-              </div>
-              <div class="flex-grow-1">
-                <div class="product-title">${product.name}</div>
-                <p>${product.description}</p>
-                <div class="product-price">$${product.price}</div>
-                <button class="btn btn-buy mt-2 add-to-cart-btn" data-id="${product.id}">
-                  Add to Cart
-                </button>
-              </div>
-            </div>
-          </div>`;
+                        <div class="product-card">
+                            <img src="${product.imageUrl || '/images/sad.gif'}"
+                                 onerror="this.onerror=null; this.src='/images/sad.gif';"
+                                 alt="Product Image"
+                                 class="product-image"/>
+                            <div class="product-title">${product.name}</div>
+                            <p>${product.description}</p>
+                            <div class="product-price">$${product.price}</div>
+                            <button class="btn btn-buy mt-2 add-to-cart-btn" data-id="${product.id}">
+                                Add to Cart
+                            </button>
+                        </div>`;
                     container.innerHTML += productHTML;
                 });
 
-                // Add click event for Add to Cart buttons
                 document.querySelectorAll('.add-to-cart-btn').forEach(button => {
                     button.addEventListener('click', () => {
                         const productId = button.getAttribute('data-id');
@@ -118,7 +114,7 @@
                             headers: {
                                 'Content-Type': 'application/x-www-form-urlencoded',
                             },
-                            body: new URLSearchParams({ quantity: '1' })  // form data
+                            body: new URLSearchParams({ quantity: '1' })
                         })
                             .then(res => {
                                 if (!res.ok) {
@@ -139,8 +135,7 @@
                 });
             })
             .catch(() => {
-                const loader = document.getElementById("product-loader");
-                loader.innerHTML = '<div class="text-danger">Failed to load products.</div>';
+                document.getElementById("product-loader").innerHTML = '<div class="text-danger">Failed to load products.</div>';
             });
     });
 </script>

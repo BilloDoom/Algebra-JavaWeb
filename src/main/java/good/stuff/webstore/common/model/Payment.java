@@ -6,8 +6,6 @@ import good.stuff.webstore.common.model.order.Order;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.math.BigDecimal;
-
 @Entity
 @Table(name = "payments")
 @Getter
@@ -28,13 +26,6 @@ public class Payment extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private PaymentStatus status;
-
-    @Column(nullable = false)
-    private BigDecimal amount;
-
-    private String transactionId;
-
-    private String payerEmail;
 
     @OneToOne
     @JoinColumn(name = "order_id", nullable = false)
