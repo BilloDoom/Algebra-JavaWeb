@@ -3,6 +3,7 @@ package good.stuff.backend.controller.user;
 import good.stuff.backend.common.dto.user.UserDto;
 import good.stuff.backend.common.request.LoginRequest;
 import good.stuff.backend.common.request.RegisterRequest;
+import good.stuff.backend.common.response.JwtResponse;
 import good.stuff.backend.service.user.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +23,7 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody LoginRequest request) {
+    public ResponseEntity<JwtResponse> login(@RequestBody LoginRequest request) {
         return ResponseEntity.ok(userService.login(request));
     }
 

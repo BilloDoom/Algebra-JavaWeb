@@ -24,9 +24,9 @@ public class Product extends BaseEntity {
 
     private int quantity;
 
-    private Double averageRating = 0.0; // From 1.0 to 5.0
+    private Double averageRating = 0.0;
 
-    private int totalRatings = 0; // Number of ratings submitted
+    private int totalRatings = 0;
 
     @ManyToOne
     @JoinColumn(name = "category_id")

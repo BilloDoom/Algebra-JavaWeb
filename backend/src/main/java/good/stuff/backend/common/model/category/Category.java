@@ -2,6 +2,7 @@ package good.stuff.backend.common.model.category;
 
 import good.stuff.backend.common.model.base.BaseEntity;
 import good.stuff.backend.common.model.product.Product;
+import good.stuff.backend.common.model.product.ProductImage;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -22,5 +23,6 @@ public class Category extends BaseEntity {
     @OneToMany(mappedBy = "category")
     private List<Product> products;
 
-    private List<String> imageUrls;
+    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CategoryImage> images;
 }

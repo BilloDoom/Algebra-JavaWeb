@@ -1,68 +1,250 @@
-:root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
-}
-
-body {
+/* Global resets */
+* {
   margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  font-family: 'Rajdhani', 'Segoe UI', sans-serif;
+  background: #0a0a0a;
+  color: #f2f2f2;
+  line-height: 1.6;
+  overflow-x: hidden;
+  /* space for fixed navbar */
+}
+
+/* Background glass container for pages */
+.page-container {
   min-height: 100vh;
+  padding: 2rem;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(0, 0, 0, 0.2));
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+/* Glassy cards */
+.glass-card {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(16px);
+  padding: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: transform 0.3s ease;
 }
 
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
+.glass-card:hover {
+  transform: scale(1.02);
+}
+
+/* Futuristic buttons */
+.btn {
+  background: transparent;
+  color: #00ffff;
+  border: 1px solid #00ffff;
+  padding: 0.6rem 1.2rem;
+  border-radius: 0;
   cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  transition: all 0.2s ease;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+.btn:hover {
+  border: 1px solid;
+  padding: 0.8rem 1.4rem;
+  background: #00ffff;
+  color: #0a0a0a;
+}
+
+/* Input styling */
+input,
+select,
+textarea {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 0.6rem 1rem;
+  color: #f2f2f2;
+  border-radius: 0;
+  outline: none;
+}
+
+input:focus,
+textarea:focus {
+  border-color: #00ffff;
+}
+
+/* Section titles */
+.section-title {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  letter-spacing: 1px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 0.5rem;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 255, 255, 0.2);
+}
+
+/* NavBar styles */
+.glass-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 60px;
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: none;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  padding: 0 2rem;
+}
+
+/* Subtle centered border line below navbar */
+.glass-nav::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 5%;
+  width: 90%;
+  height: 1px;
+  background-color: rgba(0, 255, 255, 0.4);
+}
+
+/* Navigation links */
+.nav-list {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  height: 100%;
+}
+
+.nav-link {
+  color: #f2f2f2;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 500;
+  padding: 0.4rem 0.8rem;
+  /*border: 1px solid #00ffff;*/
+  border-radius: 0;
+  height: 40px;
+  transition: all 0.15s ease;
+  transform-style: preserve-3d;
+  will-change: transform;
+  position: relative;
+  overflow: visible;
+  pointer-events: auto;
+}
+
+/* Link borders don't touch corners */
+.nav-link::before,
+.nav-link::after {
+  content: '';
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.2);
+  z-index: 1;
+}
+
+.nav-link::before {
+  top: -4px;
+  left: -4px;
+}
+
+.nav-link::after {
+  bottom: -4px;
+  right: -4px;
+}
+
+.nav-link:hover,
+.nav-link.selected {
+  background: rgba(200, 200, 200, 0.1);
+  color: #00ffff;
+  scale: 1.05;
+  /*font-size: 1.05rem;*/
+}
+
+.nav-inner {
+  background: rgba(200, 200, 200, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: transform 0.15s ease;
+  transform-style: preserve-3d;
+  will-change: transform;
+  pointer-events: none;
+  padding: .2rem .5rem;
+  /* prevents inner from breaking click */
+}
+
+.nav-separator {
+  width: 1px;
+  height: 30px;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.nav-link-tracker {
+  position: absolute;
+  background: rgba(0, 255, 255, 0.05);
+  /* subtle glassy look */
+  border: 1px solid rgba(0, 255, 255, 0.2);
+  pointer-events: none;
+  transition: all 0.3s ease;
+  border-radius: 4px;
+  z-index: 0;
+}
+
+/* Dropdown/Profile area */
+.nav-profile-container {
+  position: relative;
+}
+
+.profile-icon {
+  width: 28px;
+  height: 28px;
+  background: rgba(0, 255, 255, 0.2);
+  border: 1px solid #00ffff;
+  cursor: pointer;
+}
+
+/* No shadow, flat glass look */
+.dropdown-menu {
+  position: absolute;
+  top: 36px;
+  right: 0;
+  background: rgba(10, 10, 10, 0.9);
+  border: 1px solid rgba(0, 255, 255, 0.2);
+  backdrop-filter: blur(8px);
+  padding: 0.5rem;
+  z-index: 20;
+  min-width: 140px;
+}
+
+.dropdown-item {
+  background: transparent;
+  color: #f2f2f2;
+  border: none;
+  width: 100%;
+  text-align: left;
+  padding: 0.4rem 0.8rem;
+  cursor: pointer;
+  border-radius: 0;
+}
+
+.dropdown-item:hover {
+  background: rgba(0, 255, 255, 0.1);
+  color: #00ffff;
 }
