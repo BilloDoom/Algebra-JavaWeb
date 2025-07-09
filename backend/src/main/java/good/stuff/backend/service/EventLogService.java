@@ -5,6 +5,7 @@ import good.stuff.backend.repository.EventLogRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class EventLogService {
@@ -18,5 +19,9 @@ public class EventLogService {
     public void logEvent(String username, String eventType, String message, String ipAddress) {
         EventLog event = new EventLog(username, eventType, message, ipAddress, LocalDateTime.now());
         repository.save(event);
+    }
+
+    public List<EventLog> getEvents(){
+        return repository.findAll();
     }
 }

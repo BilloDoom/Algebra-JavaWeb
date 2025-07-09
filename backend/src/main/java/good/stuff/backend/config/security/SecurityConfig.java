@@ -1,10 +1,13 @@
 package good.stuff.backend.config.security;
 
+import good.stuff.backend.handler.CustomLogoutHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -20,21 +23,33 @@ import java.util.List;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthFilter;
+    private final CustomLogoutHandler customLogoutHandler;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .csrf().disable().cors().disable()
+                .csrf().disable()
+                .cors()
+                .and()
                 .authorizeHttpRequests(auth -> auth
-                        //.requestMatchers("/api/users/login", "/api/users/register").permitAll()
-                        .anyRequest().permitAll()
+                        .requestMatchers("/api/users/login", "/api/users/register").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/categories/**", "/api/products/**").permitAll()
+                        .anyRequest().authenticated()
                 )
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                .logout(logout -> logout
+                        .logoutUrl("/api/users/logout")  // your logout endpoint
+                        .addLogoutHandler(customLogoutHandler)  // add your custom logout handler here
+                        .logoutSuccessHandler((request, response, authentication) -> {
+                            response.setStatus(200); // return 200 on logout success
+                        })
+                );
 
         return http.build();
     }

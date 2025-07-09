@@ -1,6 +1,6 @@
 // src/pages/CategoryListPage.jsx
 import { useEffect, useState } from "react";
-import { getAllCategories, deleteCategory } from "../api/api";
+import { getAllCategories, deleteCategory } from "../../api/api";
 import { Link } from "react-router-dom";
 
 function CategoryListPage() {

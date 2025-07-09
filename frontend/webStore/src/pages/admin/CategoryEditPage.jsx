@@ -5,7 +5,7 @@ import {
   createCategory,
   updateCategory,
   getCategoryById,
-} from "../api/api";
+} from "../../api/api";
 
 function CategoryEditPage() {
   const { id } = useParams();

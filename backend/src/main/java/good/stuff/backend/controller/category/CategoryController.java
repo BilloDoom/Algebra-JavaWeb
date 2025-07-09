@@ -27,19 +27,19 @@ public class CategoryController {
         return ResponseEntity.ok(categoryService.getCategoryById(id));
     }
 
-    //@PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<CategoryDto> createCategory(@RequestBody CategoryDto request) {
         return ResponseEntity.ok(categoryService.createCategory(request));
     }
 
-    //@PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<CategoryDto> updateCategory(@PathVariable Long id, @RequestBody CategoryDto request) {
         return ResponseEntity.ok(categoryService.updateCategory(id, request));
     }
 
-    //@PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteCategory(@PathVariable Long id) {
         categoryService.deleteCategory(id);

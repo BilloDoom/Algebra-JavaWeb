@@ -4,7 +4,7 @@ import {
   addAddress,
   deleteAddress,
   updateAddress,
-} from "../api/api";
+} from "../../api/api";
 
 export default function ProfilePage() {
   const userId = localStorage.getItem("userId");

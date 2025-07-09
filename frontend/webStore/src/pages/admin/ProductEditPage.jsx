@@ -5,7 +5,7 @@ import {
   getProductById,
   deleteProduct,
   getAllCategories,
-} from "../api/api";
+} from "../../api/api";
 import { useNavigate, useParams } from "react-router-dom";
 
 export default function ProductEditPage() {

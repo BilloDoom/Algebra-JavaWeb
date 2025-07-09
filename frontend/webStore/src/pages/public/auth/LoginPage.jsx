@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { loginUser } from "../api/api";
+import { loginUser } from "../../../api/api";
 import { useNavigate, Link } from "react-router-dom";
 
 export default function LoginPage() {
@@ -12,7 +12,7 @@ export default function LoginPage() {
             const response = await loginUser(form);
             localStorage.setItem("jwt", response.token);
             localStorage.setItem("userId", response.userId);
-            navigate("/addresses");
+            navigate("/home");
         } catch (err) {
             alert("Login failed. Please check your credentials.");
         }

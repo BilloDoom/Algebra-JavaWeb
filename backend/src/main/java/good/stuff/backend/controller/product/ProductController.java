@@ -27,20 +27,20 @@ public class ProductController {
         return ResponseEntity.ok(productService.getProductById(id));
     }
 
-    //@PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<ProductDto> createProduct(@RequestBody ProductDto request) {
         return ResponseEntity.ok(productService.createProduct(request));
     }
 
-    //@PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<ProductDto> updateProduct(@PathVariable Long id,
                                                     @RequestBody ProductDto request) {
         return ResponseEntity.ok(productService.updateProduct(id, request));
     }
 
-    //@PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
         productService.deleteProduct(id);

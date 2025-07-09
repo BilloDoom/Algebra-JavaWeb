@@ -52,20 +52,29 @@ export const addRating = async (productId, rating) =>
 
 //#region USER
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("jwt");
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
+    const token = localStorage.getItem("jwt");
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
 });
 
 export const loginUser = async (credentials) =>
-  await api
-    .post("/users/login", credentials)
-    .then((res) => res.data);
+    await api
+        .post("/users/login", credentials)
+        .then((res) => res.data);
 
 export const registerUser = async (user) =>
-  await api.post("/users/register", user).then((res) => res.data);
+    await api.post("/users/register", user).then((res) => res.data);
+
+export const logoutUser = async () => {
+  const token = localStorage.getItem("jwt");
+  return api.post("/users/logout", null, {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  });
+};
 //#endregion
 
 //#region ADDRESS
@@ -80,4 +89,23 @@ export const updateAddress = async (userId, address) =>
 
 export const deleteAddress = async (userId, addressId) =>
     await api.delete(`/users/${userId}/addresses/${addressId}`).then(res => res.data);
+//#endregion
+
+//#region ADMIN
+export const getAuthLogs = async () =>
+    await api.get("/admin/logs").then(res => res.data);
+//#endregion
+
+//#region CART
+export const getCart= async () =>
+  await api.get("/cart").then(res => res.data);
+
+export const addToCart = async (productId) =>
+  await api.post("/cart/add", { productId }).then(res => res.data);
+
+export const updateCartItem = async (productId, quantity) =>
+  await api.post("/cart/update", { productId, quantity });
+
+export const removeCartItem = async (productId) =>
+  await api.delete(`/cart/remove/${productId}`);
 //#endregion

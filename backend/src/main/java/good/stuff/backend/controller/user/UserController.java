@@ -5,8 +5,12 @@ import good.stuff.backend.common.request.LoginRequest;
 import good.stuff.backend.common.request.RegisterRequest;
 import good.stuff.backend.common.response.JwtResponse;
 import good.stuff.backend.service.user.UserService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,6 +29,13 @@ public class UserController {
     @PostMapping("/login")
     public ResponseEntity<JwtResponse> login(@RequestBody LoginRequest request) {
         return ResponseEntity.ok(userService.login(request));
+    }
+
+    @PostMapping("/logout")
+    public void logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
+        if (authentication != null) {
+            new SecurityContextLogoutHandler().logout(request, response, authentication);
+        }
     }
 
     @DeleteMapping("/delete/{userId}")

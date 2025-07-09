@@ -1,6 +1,6 @@
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { getProductById, getRatings, addRating } from "../api/api";
+import { getProductById, getRatings, addRating } from "../../api/api";
 
 export default function ProductDetailsPage() {
   const { id } = useParams();
