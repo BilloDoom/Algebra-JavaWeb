@@ -18,4 +18,4 @@ RUN chmod +x ./gradlew
 RUN ./gradlew build --no-daemon
 
 # Run the app using the built jar
-CMD ["java", "-jar", "build/libs/your-app-name-0.0.1-SNAPSHOT.jar"]
+CMD ["java", "-jar", "build/libs/backend-0.0.1-SNAPSHOT.jar"]
