@@ -1,21 +1,14 @@
-// src/pages/CategoryListPage.jsx
 import { useEffect, useState } from "react";
-import { getAllCategories, deleteCategory } from "../../api/api";
-import { Link } from "react-router-dom";
+import { getAllCategories } from "../../api/api";
+import { useNavigate } from "react-router-dom";
 
 function CategoryListPage() {
   const [categories, setCategories] = useState([]);
+  const navigate = useNavigate();
 
   const loadCategories = async () => {
     const data = await getAllCategories();
     setCategories(data);
-  };
-
-  const handleDelete = async (id) => {
-    if (window.confirm("Delete this category?")) {
-      await deleteCategory(id);
-      loadCategories();
-    }
   };
 
   useEffect(() => {
@@ -23,34 +16,24 @@ function CategoryListPage() {
   }, []);
 
   return (
-    <div>
-      <h2 className="text-2xl font-bold mb-4">Categories</h2>
-      <Link to="/categories/new" className="btn btn-primary mb-4">
-        Add New Category
-      </Link>
-      <ul className="space-y-4">
+    <div className="page-container max-w-4xl mx-auto">
+      <h2 className="section-title mb-6">Categories</h2>
+      <ul className="space-y-4" style={{ listStyleType: "none", paddingLeft: 0 }}>
         {categories.map((cat) => (
-          <li key={cat.id} className="border p-4 rounded shadow-sm">
-            <h3 className="font-semibold">{cat.name}</h3>
-            {cat.imageUrls && (
-              <div className="flex space-x-2 mt-2">
-                {cat.imageUrls.map((img) => (
-                  <img
-                    key={img.id}
-                    src={img.imageUrl}
-                    alt="category"
-                    className="h-16 w-16 object-cover rounded"
-                  />
-                ))}
-              </div>
-            )}
-            <div className="mt-2 space-x-2">
-              <Link to={`/categories/edit/${cat.id}`} className="btn btn-sm btn-outline">
-                Edit
-              </Link>
-              <button onClick={() => handleDelete(cat.id)} className="btn btn-sm btn-danger">
-                Delete
-              </button>
+          <li
+            key={cat.id}
+            className="glass-card cursor-pointer p-4"
+            onClick={() => navigate(`/products?categoryId=${cat.id}`)}
+          >
+            <div className="flex items-center gap-4">
+              {cat.imageUrls && cat.imageUrls.length > 0 && (
+                <img
+                  src={cat.imageUrls[0].imageUrl}
+                  alt={cat.name}
+                  className="h-16 w-16 object-cover rounded"
+                />
+              )}
+              <span className="font-semibold text-lg">{cat.name}</span>
             </div>
           </li>
         ))}

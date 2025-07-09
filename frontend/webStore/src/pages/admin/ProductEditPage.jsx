@@ -5,40 +5,72 @@ import {
   getProductById,
   deleteProduct,
   getAllCategories,
+  getAllProducts,
 } from "../../api/api";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
-export default function ProductEditPage() {
+export default function AdminProductPage() {
+  const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [selectedProductId, setSelectedProductId] = useState(null);
   const [product, setProduct] = useState({
     name: "",
     description: "",
     price: 0,
     quantity: 0,
     category: { id: "", name: "" },
-    images: [],
+    images: [], // URLs of uploaded images
     averageRating: 0,
     totalRatings: 0,
   });
+  const [imageFiles, setImageFiles] = useState([]); // Files selected for upload
 
-  const [categories, setCategories] = useState([]);
   const navigate = useNavigate();
-  const { id } = useParams();
-  const isEdit = !!id;
 
   useEffect(() => {
-    // Fetch categories
-    getAllCategories().then(setCategories);
+    loadCategories();
+    loadProducts();
+  }, []);
 
-    if (isEdit) {
-      getProductById(id).then((data) => {
-        setProduct({
-          ...data,
-          category: data.category || { id: "", name: "" },
-        });
-      });
-    }
-  }, [id]);
+  const loadCategories = async () => {
+    const data = await getAllCategories();
+    setCategories(data);
+  };
 
+  const loadProducts = async () => {
+    const data = await getAllProducts();
+    setProducts(data);
+  };
+
+  // When clicking Edit button, load product details into form
+  const handleEditClick = async (id) => {
+    const data = await getProductById(id);
+    setProduct({
+      ...data,
+      category: data.category || { id: "", name: "" },
+      images: data.images || [],
+    });
+    setSelectedProductId(id);
+    setImageFiles([]); // Reset image files on edit load
+  };
+
+  // Reset form for creating new product
+  const handleNewProduct = () => {
+    setSelectedProductId(null);
+    setProduct({
+      name: "",
+      description: "",
+      price: 0,
+      quantity: 0,
+      category: { id: "", name: "" },
+      images: [],
+      averageRating: 0,
+      totalRatings: 0,
+    });
+    setImageFiles([]);
+  };
+
+  // Handle form input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
     if (name === "categoryId") {
@@ -47,132 +79,235 @@ export default function ProductEditPage() {
         ...prev,
         category: selectedCategory || { id: "", name: "" },
       }));
+    } else if (name === "price" || name === "quantity") {
+      setProduct((prev) => ({
+        ...prev,
+        [name]: Number(value),
+      }));
     } else {
-      setProduct((prev) => ({ ...prev, [name]: value }));
+      setProduct((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
     }
   };
 
+  // Handle image file selection
+  const handleImageFilesChange = (e) => {
+    setImageFiles(Array.from(e.target.files));
+  };
+
+  // Placeholder function to upload images to Backblaze and get URLs
+  // Replace this with actual upload logic later
+  const uploadImages = async (files) => {
+    // MOCK: simulate upload and return URLs array
+    // You will implement actual upload to Backblaze and get URLs
+    return Promise.all(
+      files.map(
+        (file, idx) =>
+          new Promise((resolve) =>
+            setTimeout(() => resolve(`https://fakeurl.com/${file.name}`), 500)
+          )
+      )
+    );
+  };
+
+  // Handle form submit for create/update product
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    let uploadedImageUrls = product.images;
+
+    // If new image files selected, upload them and add URLs
+    if (imageFiles.length > 0) {
+      const newUrls = await uploadImages(imageFiles);
+      uploadedImageUrls = [...uploadedImageUrls, ...newUrls];
+    }
 
     const productPayload = {
       ...product,
       categoryId: product.category?.id,
+      images: uploadedImageUrls,
     };
 
-    if (isEdit) await updateProduct(id, productPayload);
-    else await createProduct(productPayload);
+    if (selectedProductId) {
+      await updateProduct(selectedProductId, productPayload);
+      alert("Product updated.");
+    } else {
+      await createProduct(productPayload);
+      alert("Product created.");
+    }
 
-    navigate("/products");
+    setImageFiles([]);
+    setSelectedProductId(null);
+    setProduct({
+      name: "",
+      description: "",
+      price: 0,
+      quantity: 0,
+      category: { id: "", name: "" },
+      images: [],
+      averageRating: 0,
+      totalRatings: 0,
+    });
+    loadProducts();
   };
 
-  const handleDelete = async () => {
+  const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this product?")) {
       await deleteProduct(id);
-      navigate("/products");
+      alert("Product deleted.");
+      if (selectedProductId === id) {
+        handleNewProduct();
+      }
+      loadProducts();
     }
   };
 
   return (
-    <div className="p-4 max-w-2xl mx-auto space-y-6">
-      <h2 className="text-xl font-semibold">
-        {isEdit ? "Edit Product" : "Create Product"}
-      </h2>
+    <div className="page-container max-w-5xl mx-auto p-6 space-y-8">
+      <h1 className="section-title">Admin Product Management</h1>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <input
-          name="name"
-          placeholder="Name"
-          className="w-full p-2 border rounded"
-          value={product.name}
-          onChange={handleChange}
-        />
-        <textarea
-          name="description"
-          placeholder="Description"
-          className="w-full p-2 border rounded"
-          value={product.description}
-          onChange={handleChange}
-        />
-        <input
-          name="price"
-          type="number"
-          placeholder="Price"
-          className="w-full p-2 border rounded"
-          value={product.price}
-          onChange={(e) =>
-            setProduct({ ...product, price: parseFloat(e.target.value) })
-          }
-        />
-        <input
-          name="quantity"
-          type="number"
-          placeholder="Quantity"
-          className="w-full p-2 border rounded"
-          value={product.quantity}
-          onChange={(e) =>
-            setProduct({ ...product, quantity: parseInt(e.target.value) })
-          }
-        />
-
-        {/* Category Dropdown */}
-        <select
-          name="categoryId"
-          className="w-full p-2 border rounded"
-          value={product.category?.id || ""}
-          onChange={handleChange}
+      {/* Product List */}
+      <div>
+        <h2 className="text-lg font-semibold mb-3">All Products</h2>
+        <ul
+          style={{ listStyleType: "none", paddingLeft: 0 }}
+          className="space-y-3 max-h-96 overflow-y-auto"
         >
-          <option value="">Select Category</option>
-          {categories.map((cat) => (
-            <option key={cat.id} value={cat.id}>
-              {cat.name}
-            </option>
+          {products.map((p) => (
+            <li
+              key={p.id}
+              className="glass-card flex justify-between items-center"
+              style={{ padding: "12px 16px" }}
+            >
+              <div className="flex flex-col">
+                <span className="font-semibold">{p.name}</span>
+                <span className="text-sm text-gray-300">
+                  Category: {p.category?.name || "N/A"}
+                </span>
+                <span className="text-sm text-gray-400">
+                  Price: ${p.price.toFixed(2)} | Qty: {p.quantity}
+                </span>
+              </div>
+              <div className="flex gap-2">
+                <button className="btn" onClick={() => handleEditClick(p.id)}>
+                  Edit
+                </button>
+                <button
+                  className="btn"
+                  style={{ borderColor: "#ff0066", color: "#ff0066" }}
+                  onClick={() => handleDelete(p.id)}
+                >
+                  Delete
+                </button>
+              </div>
+            </li>
           ))}
-        </select>
+        </ul>
+        {/* 
+        <button className="btn mt-4" onClick={handleNewProduct}>
+          + New Product
+        </button> 
+        */}
+      </div>
 
-        <button
-          type="submit"
-          className="px-4 py-2 bg-blue-600 text-white rounded"
+      {/* Product Form */}
+      <div>
+        <h2 className="text-lg font-semibold mb-4">
+          {selectedProductId ? "Edit Product" : "Create New Product"}
+        </h2>
+        <form
+          onSubmit={handleSubmit}
+          className="glass-card flex flex-col gap-4 max-w-md"
         >
-          {isEdit ? "Update" : "Create"} Product
-        </button>
-
-        {isEdit && (
-          <button
-            type="button"
-            onClick={handleDelete}
-            className="px-4 py-2 bg-red-600 text-white rounded ml-4"
+          <input
+            type="text"
+            name="name"
+            placeholder="Name"
+            value={product.name}
+            onChange={handleChange}
+            required
+            style={{ padding: "8px" }}
+          />
+          <textarea
+            name="description"
+            placeholder="Description"
+            value={product.description}
+            onChange={handleChange}
+            rows={3}
+            style={{ padding: "8px" }}
+          />
+          <input
+            type="number"
+            name="price"
+            placeholder="Price"
+            value={product.price}
+            onChange={handleChange}
+            min={0}
+            step="0.01"
+            required
+            style={{ padding: "8px" }}
+          />
+          <input
+            type="number"
+            name="quantity"
+            placeholder="Quantity"
+            value={product.quantity}
+            onChange={handleChange}
+            min={0}
+            required
+            style={{ padding: "8px" }}
+          />
+          <select
+            name="categoryId"
+            value={product.category?.id || ""}
+            onChange={handleChange}
+            required
+            style={{ padding: "8px" }}
           >
-            Delete
-          </button>
-        )}
-      </form>
-
-      {isEdit && (
-        <div className="mt-6">
-          <h3 className="font-semibold text-lg mb-2">Images</h3>
-          <div className="flex gap-4 flex-wrap">
-            {product.images?.map((img) => (
-              <img
-                key={img.id}
-                src={img.imageUrl}
-                alt="Product"
-                className="w-24 h-24 object-cover border rounded"
-              />
+            <option value="">Select Category</option>
+            {categories.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
             ))}
-            {!product.images?.length && <p>No images available.</p>}
+          </select>
+
+          {/* Image Upload */}
+          <div>
+            <label className="block mb-1">Upload Images</label>
+            <input
+              type="file"
+              multiple
+              accept="image/*"
+              onChange={handleImageFilesChange}
+              className="border rounded p-1 bg-transparent"
+            />
           </div>
 
-          <div className="mt-4">
-            <p>
-              <strong>Average Rating:</strong> {product.averageRating || 0} ⭐
-            </p>
-            <p>
-              <strong>Total Ratings:</strong> {product.totalRatings || 0}
-            </p>
-          </div>
-        </div>
-      )}
+          {/* Show existing images */}
+          {product.images.length > 0 && (
+            <div
+              className="flex gap-3 flex-wrap mt-4"
+              style={{ marginBottom: "12px" }}
+            >
+              {product.images.map((imgUrl, idx) => (
+                <img
+                  key={idx}
+                  src={imgUrl}
+                  alt={`Product ${idx + 1}`}
+                  className="w-20 h-20 object-cover border rounded"
+                />
+              ))}
+            </div>
+          )}
+
+          <button type="submit" className="btn">
+            {selectedProductId ? "Update Product" : "Create Product"}
+          </button>
+        </form>
+      </div>
     </div>
   );
 }

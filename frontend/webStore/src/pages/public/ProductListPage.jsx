@@ -1,72 +1,156 @@
 import { useEffect, useState } from "react";
-import { getAllProducts } from "../../api/api";
+import { addToCart, getAllProducts, getAllCategories } from "../../api/api";
 import { useNavigate } from "react-router-dom";
 
 export default function ProductListPage() {
   const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [filters, setFilters] = useState({
+    categoryId: "",
+    priceMin: 0,
+    priceMax: 1000,
+  });
+
   const navigate = useNavigate();
 
   useEffect(() => {
+    loadCategories();
     loadProducts();
   }, []);
 
+  useEffect(() => {
+    loadProducts();
+  }, [filters]);
+
   const loadProducts = async () => {
-    const data = await getAllProducts();
+    const data = await getAllProducts(filters);
     setProducts(data);
   };
 
-const handleAddToCart = (product) => {
-  const token = localStorage.getItem("jwt");
+  const loadCategories = async () => {
+    const data = await getAllCategories();
+    setCategories(data);
+  };
 
-  if (!token) {
-    const existingCart = JSON.parse(localStorage.getItem("cart")) || [];
+  const handleAddToCart = (product) => {
+    const token = localStorage.getItem("jwt");
 
-    const existingIndex = existingCart.findIndex(p => p.id === product.id);
-    if (existingIndex >= 0) {
-      existingCart[existingIndex].quantity += 1;
+    if (!token) {
+      const existingCart = JSON.parse(localStorage.getItem("cart")) || [];
+      const existingIndex = existingCart.findIndex((p) => p.id === product.id);
+
+      if (existingIndex >= 0) {
+        existingCart[existingIndex].quantity += 1;
+      } else {
+        existingCart.push({
+          id: product.id,
+          name: product.name,
+          price: product.price,
+          quantity: 1,
+        });
+      }
+
+      localStorage.setItem("cart", JSON.stringify(existingCart));
+      alert("Added to cart (saved locally).");
     } else {
-      existingCart.push({
-        id: product.id,
-        name: product.name,
-        price: product.price,
-        quantity: 1,
-      });
+      addToCart(product.id)
+        .then(() => alert("Added to cart."))
+        .catch(() => alert("Failed to add to cart."));
     }
+  };
 
-    localStorage.setItem("cart", JSON.stringify(existingCart));
-    alert("Added to cart (saved locally).");
-  } else {
-    addToCartBackend(product.id)
-      .then(() => alert("Added to cart."))
-      .catch(() => alert("Failed to add to cart."));
-  }
-};
+  const handleFilterChange = (e) => {
+    const { name, value } = e.target;
+    setFilters((prev) => ({
+      ...prev,
+      [name]: name === "priceMin" || name === "priceMax" ? Number(value) : value,
+    }));
+  };
 
-
+  const resetFilters = () => {
+    setFilters({
+      categoryId: "",
+      priceMin: 0,
+      priceMax: 1000,
+    });
+  };
 
   return (
-    <div className="p-4 max-w-4xl mx-auto">
-      <h1 className="text-2xl font-semibold mb-4">Product List</h1>
+    <div className="page-container max-w-4xl mx-auto">
+      <h1 className="section-title">Product List</h1>
 
+      {/* Filters */}
+      <div className="mb-6 flex flex-wrap gap-4 items-end glass-card">
+        <div>
+          <label className="block text-sm font-medium mb-1">Category</label>
+          <select
+            name="categoryId"
+            value={filters.categoryId}
+            onChange={handleFilterChange}
+            className="border px-3 py-1 rounded"
+          >
+            <option value="">All Categories</option>
+            {categories.map((cat) => (
+              <option key={cat.id} value={cat.id}>
+                {cat.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-1">Price Min</label>
+          <input
+            type="number"
+            name="priceMin"
+            min={0}
+            max={1000}
+            value={filters.priceMin}
+            onChange={handleFilterChange}
+            className="border px-3 py-1 rounded w-24"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-1">Price Max</label>
+          <input
+            type="number"
+            name="priceMax"
+            min={0}
+            max={1000}
+            value={filters.priceMax}
+            onChange={handleFilterChange}
+            className="border px-3 py-1 rounded w-24"
+          />
+        </div>
+
+        <button
+          onClick={resetFilters}
+          className="btn"
+        >
+          Reset Filters
+        </button>
+      </div>
+
+      {/* Product List */}
       <ul className="space-y-4">
         {products.map((p) => (
           <li
             key={p.id}
-            className="p-4 border rounded hover:bg-gray-50 transition"
-            style={{ backgroundColor: "rgba(255, 255, 255, 0.1)" }}
+            className="glass-card cursor-pointer"
           >
-            <div
-              onClick={() => navigate(`/products/${p.id}`)}
-              className="cursor-pointer"
-            >
+            <div onClick={() => navigate(`/products/${p.id}`)} className="mb-2">
               <p className="font-semibold">{p.name}</p>
-              <p className="text-gray-600">${p.price.toFixed(2)}</p>
+              <p className="text-gray-400">${p.price.toFixed(2)}</p>
               <p className="text-sm text-gray-500">In stock: {p.quantity}</p>
             </div>
 
             <button
-              className="mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-              onClick={() => handleAddToCart(p)}
+              className="btn"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleAddToCart(p);
+              }}
             >
               Add to Cart
             </button>

@@ -11,6 +11,7 @@ import ProfilePage from "./pages/public/ProfilePage";
 import AdminLogsPage from "./pages/admin/LogsPage";
 import CartPage from "./pages/CartPage";
 import CheckoutPage from "./pages/CheckoutPage";
+import RequireAuth from "./auth/RequireAuth";
 
 function App() {
   return (
@@ -23,7 +24,7 @@ function App() {
             {/* Public Routes */}
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
-            <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/profile" element={<RequireAuth><ProfilePage /></RequireAuth>} />
 
             <Route path="/products" element={<ProductListPage />} />
             <Route path="/products/:id" element={<ProductDetailsPage />} />
@@ -31,16 +32,18 @@ function App() {
             <Route path="/categories" element={<CategoryListPage />} />
 
             <Route path="/cart" element={<CartPage />} />
-            <Route path="/checkout" element={<CheckoutPage />} />
+            <Route path="/checkout" element={<RequireAuth><CheckoutPage /></RequireAuth>} />
 
             {/* Admin Routes */}
-            <Route path="/products/edit/:id" element={<ProductEditPage />} />
-            <Route path="/products/new" element={<ProductEditPage />} />
+      
+              <Route path="/products/edit/:id" element={<RequireAuth><ProductEditPage /></RequireAuth>} />
+              <Route path="/products/new" element={<RequireAuth><ProductEditPage /></RequireAuth>} />
 
-            <Route path="/categories/new" element={<CategoryEditPage />} />
-            <Route path="/categories/edit/:id" element={<CategoryEditPage />} />
+              <Route path="/categories/new" element={<RequireAuth><CategoryEditPage /></RequireAuth>} />
+              <Route path="/categories/edit/:id" element={<RequireAuth><CategoryEditPage /></RequireAuth>} />
 
-            <Route path="/admin/logs" element={<AdminLogsPage />} />
+              <Route path="/admin/logs" element={<RequireAuth><AdminLogsPage /></RequireAuth>} />
+         
           </Routes>
         </div>
       </div>

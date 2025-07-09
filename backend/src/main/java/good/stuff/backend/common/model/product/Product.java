@@ -1,5 +1,6 @@
 package good.stuff.backend.common.model.product;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import good.stuff.backend.common.model.base.BaseEntity;
 import good.stuff.backend.common.model.category.Category;
 import jakarta.persistence.*;
@@ -33,5 +34,6 @@ public class Product extends BaseEntity {
     private Category category;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<ProductImage> images;
 }

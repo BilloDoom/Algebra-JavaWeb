@@ -9,8 +9,19 @@ const api = axios.create({
 });
 
 //#region PRODUCT
-export const getAllProducts = async () =>
-    await api.get("/products").then(res => res.data);
+//export const getAllProducts = async () =>
+//    await api.get("/products").then(res => res.data);
+
+export const getAllProducts = async (filters = {}) => {
+  const query = new URLSearchParams();
+
+  if (filters.categoryId) query.append("categoryId", filters.categoryId);
+  query.append("priceMin", filters.priceMin ?? 0);
+  query.append("priceMax", filters.priceMax ?? 1000);
+
+  const res = await api.get(`/products?${query.toString()}`);
+  return res.data;
+};
 
 export const getProductById = async (id) =>
     await api.get(`/products/${id}`).then(res => res.data);
@@ -75,6 +86,16 @@ export const logoutUser = async () => {
     }
   });
 };
+
+export const getProfile = async (userId) => {
+  try {
+    const response = await api.get(`/users/${userId}/profile`);
+    return response.data;
+  } catch (error) {
+    console.error("Failed to fetch user profile", error);
+    throw error;
+  }
+};
 //#endregion
 
 //#region ADDRESS
@@ -97,15 +118,37 @@ export const getAuthLogs = async () =>
 //#endregion
 
 //#region CART
-export const getCart= async () =>
+export const getCart = async () =>
   await api.get("/cart").then(res => res.data);
 
-export const addToCart = async (productId) =>
-  await api.post("/cart/add", { productId }).then(res => res.data);
+export const addToCart = async (productId, quantity = 1) =>
+  await api.post("/cart/add", { productId, quantity });
 
-export const updateCartItem = async (productId, quantity) =>
-  await api.post("/cart/update", { productId, quantity });
+export const updateCartItem = async (cartItemId, quantity) =>
+  await api.put(`/cart/update/${cartItemId}`, quantity, {
+    headers: { 'Content-Type': 'application/json' }
+  });
 
-export const removeCartItem = async (productId) =>
-  await api.delete(`/cart/remove/${productId}`);
+export const removeCartItem = async (cartItemId) =>
+  await api.delete(`/cart/remove/${cartItemId}`);
+//#endregion
+
+//#region ORDER
+export const createOrder = async ({ userId, shippingAddress, paymentType }) => {
+  const params = new URLSearchParams({ userId, shippingAddress, paymentType });
+  const response = await api.post(`/orders?${params.toString()}`);
+  return response.data;
+};
+
+export const getUserOrders = async (userId) => {
+  const token = localStorage.getItem("jwt");
+
+  const response = await api.get(`/orders/user/${userId}`, {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  });
+
+  return response.data;
+};
 //#endregion

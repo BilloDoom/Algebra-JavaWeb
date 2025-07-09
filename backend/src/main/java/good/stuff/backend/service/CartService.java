@@ -1,15 +1,19 @@
 package good.stuff.backend.service;
 
+import good.stuff.backend.common.dto.cart.CartItemDto;
+import good.stuff.backend.common.request.CartItemRequest;
 import good.stuff.backend.common.model.cart.CartItem;
 import good.stuff.backend.common.model.product.Product;
 import good.stuff.backend.common.model.user.User;
-import good.stuff.backend.repository.product.ProductRepository;
 import good.stuff.backend.repository.cart.CartItemRepository;
+import good.stuff.backend.repository.product.ProductRepository;
 import good.stuff.backend.repository.user.UserRepository;
+import good.stuff.backend.utils.MapperUtils;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class CartService {
@@ -26,18 +30,19 @@ public class CartService {
         this.userRepository = userRepository;
     }
 
-    // For logged-in users: get DB cart
-    public List<CartItem> getCartByUser(Long userId) {
-        return userRepository.findById(userId)
-                .map(cartItemRepository::findByUser)
-                .orElse(List.of());
+    // Return list of CartItemDto for controller
+    public List<CartItemDto> getCartItemsDto(Long userId) {
+        User user = findUserOrThrow(userId);
+        List<CartItem> cartItems = cartItemRepository.findByUser(user);
+        return cartItems.stream()
+                .map(item -> MapperUtils.map(item, CartItemDto.class))
+                .collect(Collectors.toList());
     }
 
-    // Add or update cart item for logged-in user
-    public void addOrUpdateItem(Long userId, Long productId, int quantity) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-        Product product = productRepository.findById(productId)
+    // Add or update cart item from DTO
+    public void addOrUpdateItem(Long userId, CartItemRequest request) {
+        User user = findUserOrThrow(userId);
+        Product product = productRepository.findById(request.productId())
                 .orElseThrow(() -> new RuntimeException("Product not found"));
 
         CartItem item = cartItemRepository.findByUserAndProduct(user, product)
@@ -45,11 +50,14 @@ public class CartService {
 
         item.setUser(user);
         item.setProduct(product);
-        item.setQuantity(item.getQuantity() + quantity);
+
+        // If new item, quantity = request.quantity, else add request.quantity to existing quantity
+        int newQuantity = (item.getId() < 0) ? request.quantity() : item.getQuantity() + request.quantity();
+        item.setQuantity(newQuantity);
+
         cartItemRepository.save(item);
     }
 
-    // Update quantity
     public void updateQuantity(Long cartItemId, int quantity) {
         CartItem item = cartItemRepository.findById(cartItemId)
                 .orElseThrow(() -> new RuntimeException("Cart item not found"));
@@ -62,29 +70,29 @@ public class CartService {
     }
 
     public void clearCart(Long userId) {
-        userRepository.findById(userId)
-                .ifPresent(user -> {
-                    List<CartItem> items = cartItemRepository.findByUser(user);
-                    cartItemRepository.deleteAll(items);
-                });
+        User user = findUserOrThrow(userId);
+        List<CartItem> items = cartItemRepository.findByUser(user);
+        cartItemRepository.deleteAll(items);
     }
 
-    // Merge session cart items into DB cart after login
-    public void mergeSessionCart(Long userId, List<CartItem> sessionCartItems) {
-        for (CartItem sessionItem : sessionCartItems) {
-            addOrUpdateItem(userId, sessionItem.getProduct().getId(), sessionItem.getQuantity());
+    // Merge session cart: accepts list of CartItemRequest DTOs and merges them
+    public void mergeSessionCart(Long userId, List<CartItemRequest> sessionCartRequests) {
+        for (CartItemRequest req : sessionCartRequests) {
+            addOrUpdateItem(userId, req);
         }
     }
 
-    public List<CartItem> getCartItems(Long userId) {
-        return getCartByUser(userId);
+    // Helper method
+    private User findUserOrThrow(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
     }
 
-    public BigDecimal calculateTotal(List<CartItem> cartItems) {
-        return cartItems.stream()
-                .map(item -> item.getProduct().getPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
+    // Calculate total from CartItemDto list
+    public BigDecimal calculateTotal(List<CartItemDto> cartItemsDto) {
+        return cartItemsDto.stream()
+                .map(itemDto -> itemDto.getProduct().getPrice()
+                        .multiply(BigDecimal.valueOf(itemDto.getQuantity())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
-
 }
-

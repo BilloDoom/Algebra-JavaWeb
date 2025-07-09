@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom"; // ⬅️ Import for navigation
+import { useNavigate } from "react-router-dom";
 import {
   getCart,
   updateCartItem,
@@ -9,7 +9,7 @@ import {
 export default function CartPage() {
   const [cart, setCart] = useState([]);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const navigate = useNavigate(); // ⬅️ Hook to navigate
+  const navigate = useNavigate();
 
   useEffect(() => {
     const token = localStorage.getItem("jwt");
@@ -17,11 +17,31 @@ export default function CartPage() {
 
     if (token) {
       getCart()
-        .then((data) => setCart(data))
+        .then((data) => {
+          const mappedCart = data.map(item => ({
+            id: item.id,
+            quantity: item.quantity,
+            productId: item.product.id,
+            name: item.product.name,
+            price: item.product.price,
+            description: item.product.description,
+            category: item.product.category,
+            images: item.product.images,
+          }));
+          setCart(mappedCart);
+        })
         .catch(() => alert("Failed to load cart from database"));
+
     } else {
       const stored = JSON.parse(localStorage.getItem("cart") || "[]");
-      setCart(stored.map(p => ({ ...p, quantity: p.quantity || 1 })));
+      // Ensure quantity defaults to 1 and price is defined (default 0)
+      setCart(
+        stored.map(p => ({
+          ...p,
+          quantity: p.quantity || 1,
+          price: typeof p.price === "number" ? p.price : 0
+        }))
+      );
     }
   }, []);
 
@@ -56,7 +76,7 @@ export default function CartPage() {
   };
 
   const getTotal = () =>
-    cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
+    cart.reduce((acc, item) => acc + (item.price || 0) * item.quantity, 0);
 
   return (
     <div className="p-4 max-w-4xl mx-auto">
@@ -79,8 +99,12 @@ export default function CartPage() {
             <tbody>
               {cart.map((item) => (
                 <tr key={item.id}>
-                  <td className="p-2 border-b">{item.name}</td>
-                  <td className="p-2 border-b">${item.price.toFixed(2)}</td>
+                  <td className="p-2 border-b">{item.name || "Unnamed Product"}</td>
+                  <td className="p-2 border-b">
+                    {typeof item.price === "number"
+                      ? `$${item.price.toFixed(2)}`
+                      : "N/A"}
+                  </td>
                   <td className="p-2 border-b">
                     <input
                       type="number"
@@ -93,7 +117,9 @@ export default function CartPage() {
                     />
                   </td>
                   <td className="p-2 border-b">
-                    ${(item.price * item.quantity).toFixed(2)}
+                    {typeof item.price === "number"
+                      ? `$${(item.price * item.quantity).toFixed(2)}`
+                      : "N/A"}
                   </td>
                   <td className="p-2 border-b">
                     <button

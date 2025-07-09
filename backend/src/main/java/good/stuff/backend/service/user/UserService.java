@@ -66,4 +66,11 @@ public class UserService {
     public void deleteAccount(Long userId) {
         userRepository.deleteById(userId);
     }
+
+    public UserDto getUserProfile(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
+
+        return MapperUtils.map(user, UserDto.class);
+    }
 }

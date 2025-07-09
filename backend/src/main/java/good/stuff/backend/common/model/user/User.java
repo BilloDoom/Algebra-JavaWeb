@@ -1,5 +1,6 @@
 package good.stuff.backend.common.model.user;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import good.stuff.backend.common.enums.Role;
 import good.stuff.backend.common.model.base.BaseEntity;
 import good.stuff.backend.common.model.cart.CartItem;
@@ -38,5 +39,6 @@ public class User extends BaseEntity {
     private List<Order> orders;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<CartItem> cartItems = new ArrayList<>();
 }

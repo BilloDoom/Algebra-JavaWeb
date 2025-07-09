@@ -1,5 +1,6 @@
 package good.stuff.backend.common.model.product;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import good.stuff.backend.common.model.base.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -17,5 +18,6 @@ public class ProductImage extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id")
+    @JsonBackReference
     private Product product;
 }

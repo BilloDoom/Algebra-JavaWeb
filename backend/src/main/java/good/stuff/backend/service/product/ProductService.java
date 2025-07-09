@@ -38,6 +38,13 @@ public class ProductService {
                 .toList();
     }
 
+    public List<ProductDto> getFilteredProducts(Long categoryId, Double priceMin, Double priceMax) {
+        List<Product> filtered = productRepository.findFiltered(categoryId, priceMin, priceMax);
+        return filtered.stream()
+                .map(product -> MapperUtils.map(product, ProductDto.class))
+                .toList();
+    }
+
     public Optional<ProductDto> getProductById(Long id) {
         Optional<Product> product = productRepository.findById(id);
         return product.map(p -> MapperUtils.map(p, ProductDto.class));

@@ -18,8 +18,12 @@ public class ProductController {
     private final ProductService productService;
 
     @GetMapping
-    public ResponseEntity<List<ProductDto>> getAllProducts() {
-        return ResponseEntity.ok(productService.getAllProducts());
+    public ResponseEntity<List<ProductDto>> getAllProducts(
+            @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false, defaultValue = "0") Double priceMin,
+            @RequestParam(required = false, defaultValue = "1000") Double priceMax
+    ) {
+        return ResponseEntity.ok(productService.getFilteredProducts(categoryId, priceMin, priceMax));
     }
 
     @GetMapping("/{id}")

@@ -18,4 +18,10 @@ public interface ProductRepository extends JpaRepository<Product, Long>{
             @Param("categoryId") Long categoryId,
             @Param("maxPrice") BigDecimal maxPrice
     );
+    @Query("SELECT p FROM Product p WHERE " +
+            "(:categoryId IS NULL OR p.category.id = :categoryId) AND " +
+            "p.price BETWEEN :priceMin AND :priceMax")
+    List<Product> findFiltered(@Param("categoryId") Long categoryId,
+                               @Param("priceMin") Double priceMin,
+                               @Param("priceMax") Double priceMax);
 }

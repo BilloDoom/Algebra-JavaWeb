@@ -43,4 +43,10 @@ public class UserController {
         userService.deleteAccount(userId);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/{userId}/profile")
+    public ResponseEntity<UserDto> getProfile(@PathVariable Long userId) {
+        UserDto userDto = userService.getUserProfile(userId);
+        return ResponseEntity.ok(userDto);
+    }
 }

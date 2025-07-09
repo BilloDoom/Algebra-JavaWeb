@@ -1,5 +1,6 @@
 package good.stuff.backend.common.model.cart;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import good.stuff.backend.common.model.base.BaseEntity;
 import good.stuff.backend.common.model.product.Product;
 import good.stuff.backend.common.model.user.User;
@@ -17,6 +18,7 @@ import lombok.Setter;
 @NoArgsConstructor
 public class CartItem extends BaseEntity {
     @ManyToOne
+    @JsonBackReference
     private User user;
 
     @ManyToOne(optional = false)
