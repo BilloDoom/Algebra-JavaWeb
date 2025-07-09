@@ -1,14 +1,21 @@
-# Use official OpenJDK image
+# Use official OpenJDK image with bash
 FROM openjdk:17-jdk-slim
 
-# Set working directory
 WORKDIR /app
 
-# Copy build files
-COPY build/libs/*.jar app.jar
+# Copy gradle wrapper and build files
+COPY gradlew .
+COPY gradle gradle
 
-# Expose the port your app uses
-EXPOSE 8080
+# Copy source code
+COPY src src
+COPY build.gradle settings.gradle ./
 
-# Run the app
-ENTRYPOINT ["java", "-jar", "/app/app.jar"]
+# Give executable permission to gradlew
+RUN chmod +x ./gradlew
+
+# Build the app inside the container
+RUN ./gradlew build --no-daemon
+
+# Run the app using the built jar
+CMD ["java", "-jar", "build/libs/your-app-name-0.0.1-SNAPSHOT.jar"]
