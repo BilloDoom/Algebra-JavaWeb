@@ -18,7 +18,7 @@ function App() {
     <BrowserRouter>
       <div style={{ display: "flex" }}>
         <NavBar />
-        <div style={{ flex: 1, padding: "1rem", paddingTop: "60px" }}>
+        <div style={{ flex: 1, paddingTop: "1.5rem" }}>
 
           <Routes>
             {/* Public Routes */}

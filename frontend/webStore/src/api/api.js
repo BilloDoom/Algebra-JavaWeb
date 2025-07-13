@@ -1,8 +1,11 @@
 // src/api/api.js
 import axios from "axios";
 
+//http://localhost:8080/api
+// https://algebra-javaweb-service.onrender.com/api
+
 const api = axios.create({
-    baseURL: "https://algebra-javaweb-service.onrender.com/api",
+    baseURL: "http://localhost:8080/api",
     headers: {
         "Content-Type": "application/json",
     },

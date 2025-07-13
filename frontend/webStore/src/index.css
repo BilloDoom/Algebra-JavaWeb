@@ -19,11 +19,9 @@ body {
 /* Background glass container for pages */
 .page-container {
   min-height: 100vh;
-  padding: 2rem;
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(0, 0, 0, 0.2));
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 /* Glassy cards */
@@ -52,7 +50,6 @@ body {
 
 .btn:hover {
   border: 1px solid;
-  padding: 0.8rem 1.4rem;
   background: #00ffff;
   color: #0a0a0a;
 }
@@ -313,4 +310,205 @@ textarea:focus {
 .dropdown-item:hover {
   background: rgba(0, 255, 255, 0.1);
   color: #00ffff;
+}
+
+.page-container {
+  padding: 2rem;
+}
+
+.section-title {
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.product-layout {
+  display: flex;
+  gap: 2rem;
+  align-items: flex-start;
+}
+
+.filters-panel {
+  width: 220px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 1rem;
+}
+
+.products-grid {
+  flex: 1;
+}
+
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1.5rem;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.product-card {
+  background: rgba(255, 255, 255, 0.03);
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.product-card:hover {
+  transform: scale(1.02);
+}
+
+.product-image {
+  width: 100%;
+  height: 190px;
+  object-fit: cover;
+  border: 1px solid #ccc;
+}
+
+.image-fallback {
+  width: 100%;
+  height: 190px;
+  border: 1px solid #ccc;
+  background-color: #222;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.image-loading {
+  animation: loadImage;
+  animation-iteration-count: infinite;
+}
+
+@keyframes loadImage {
+  0% {
+    background-color: #444;
+  }
+
+  100% {
+    background-color: #444;
+  }
+}
+
+.icon {
+  width: 48px;
+  height: 48px;
+  color: #888;
+}
+
+.name {
+  font-weight: bold;
+  margin-top: 0.5rem;
+}
+
+.price {
+  color: #000;
+  background-color: #0ff;
+  font-size: 1.3rem;
+  font-weight: bold;
+  padding-left: 1rem;
+}
+
+.stock {
+  font-size: 0.9rem;
+  color: #888;
+}
+
+.spinner-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+}
+
+.spinner {
+  border: 4px solid #ccc;
+  border-top: 4px solid #0ff;
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.range-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.range-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  color: #ccc;
+  margin-top: 0.25rem;
+}
+
+.btn.secondary {
+  background-color: #333;
+  color: #aaa;
+  border: 1px solid #555;
+  margin-top: 0.5rem;
+}
+
+input[type="range"] {
+  width: 100%;
+  height: 12px;
+  outline: none;
+  margin-top: 1rem;
+  padding: 0;
+  appearance: none;
+  background: transparent;
+  /* base fallback */
+}
+
+/* Chrome / Safari / Edge */
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 33px;
+  background: #00ffffcc;
+  border: none;
+  border-radius: 0;
+  cursor: pointer;
+  margin-top: -11px;
+  /* adjusts thumb to center track vertically */
+  transition: all 0.2s ease;
+}
+
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 12px;
+  background: transparent;
+  border: none;
+}
+
+/* Firefox */
+input[type="range"]::-moz-range-thumb {
+  width: 14px;
+  height: 33px;
+  background: #00ffffcc;
+  border: none;
+  border-radius: 0;
+  cursor: pointer;
+}
+
+input[type="range"]::-moz-range-track {
+  height: 12px;
+  background: transparent;
+}
+
+/* Focus (optional but consistent) */
+input[type="range"]:focus::-webkit-slider-thumb,
+input[type="range"]:focus::-moz-range-thumb {
+  background: #00ffffcc;
 }
