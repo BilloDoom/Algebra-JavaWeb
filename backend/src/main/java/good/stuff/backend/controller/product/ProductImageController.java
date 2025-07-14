@@ -8,6 +8,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/products/{productId}/images")
@@ -19,12 +20,13 @@ public class ProductImageController {
         this.productImageService = productImageService;
     }
 
-    @PostMapping("/upload")
-    public ResponseEntity<ProductImage> uploadImage(
+    @PostMapping
+    public ResponseEntity<ProductImage> saveImageUrl(
             @PathVariable Long productId,
-            @RequestParam("file") MultipartFile file) throws IOException {
+            @RequestBody Map<String, String> payload) {
 
-        ProductImage image = productImageService.uploadImage(productId, file);
+        String imageUrl = payload.get("imageUrl");
+        ProductImage image = productImageService.saveImageUrl(productId, imageUrl);
         return ResponseEntity.ok(image);
     }
 

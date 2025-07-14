@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: minio
+    env: docker
+    plan: free
+    autoDeploy: true
+    ports:
+      - 9000
+      - 9001
+    envVars:
+      - key: MINIO_ROOT_USER
+        value: minioadmin
+      - key: MINIO_ROOT_PASSWORD
+        value: minioadmin
