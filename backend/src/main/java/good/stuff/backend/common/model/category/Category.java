@@ -2,7 +2,6 @@ package good.stuff.backend.common.model.category;
 
 import good.stuff.backend.common.model.base.BaseEntity;
 import good.stuff.backend.common.model.product.Product;
-import good.stuff.backend.common.model.product.ProductImage;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

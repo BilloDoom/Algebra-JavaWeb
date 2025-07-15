@@ -1,10 +1,6 @@
-// src/api/minioImageClient.js
 import { minio } from './minioClient';
-import {
-    PutObjectCommand,
-    DeleteObjectCommand,
-} from '@aws-sdk/client-s3';
-import { addProductImage, deleteProductImage } from './api';
+import { PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
+import { getProductById, updateProduct } from './api'; // Use product APIs
 
 const BUCKET_NAME = 'product-images';
 
@@ -17,7 +13,7 @@ export async function uploadProductImage(productId, file) {
     const command = new PutObjectCommand({
         Bucket: BUCKET_NAME,
         Key: filePath,
-        Body: new Uint8Array(arrayBuffer), // pass Uint8Array
+        Body: new Uint8Array(arrayBuffer),
         ContentType: file.type,
     });
 
@@ -28,12 +24,25 @@ export async function uploadProductImage(productId, file) {
     }
 
     const publicUrl = `http://localhost:9000/${BUCKET_NAME}/${filePath}`;
-    await addProductImage(productId, publicUrl);
+
+    // Fetch current product
+    const product = await getProductById(productId);
+
+    // Extract current images list or initialize if none
+    const images = Array.isArray(product.images) ? product.images : [];
+
+    // Add new image URL
+    images.push(publicUrl);
+
+    // Update product with new images list
+    const updatedProduct = { ...product, images };
+    await updateProduct(productId, updatedProduct);
 
     return publicUrl;
 }
 
-export async function deleteProductImageWithStorage(productId, imageId, imageUrl) {
+export async function deleteProductImageWithStorage(productId, imageUrl) {
+    // Extract key/path from URL
     const pathStart = imageUrl.indexOf(`${BUCKET_NAME}/`) + `${BUCKET_NAME}/`.length;
     const filePath = imageUrl.substring(pathStart);
 
@@ -48,5 +57,14 @@ export async function deleteProductImageWithStorage(productId, imageId, imageUrl
         throw new Error(`Delete failed: ${err.message}`);
     }
 
-    await deleteProductImage(productId, imageId);
+    // Fetch current product
+    const product = await getProductById(productId);
+    const images = Array.isArray(product.images) ? product.images : [];
+
+    // Remove image URL
+    const updatedImages = images.filter(url => url !== imageUrl);
+
+    // Update product with new images list
+    const updatedProduct = { ...product, images: updatedImages };
+    await updateProduct(productId, updatedProduct);
 }

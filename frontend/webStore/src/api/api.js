@@ -39,14 +39,21 @@ export const deleteProduct = async (id) =>
   await api.delete(`/products/${id}`);
 
 //#region PRODUCT-IMAGES
-export const getProductImages = async (productId) =>
+export const getProductImageUrls = async (productId) =>
   await api.get(`/products/${productId}/images`).then(res => res.data);
 
-export const addProductImage = async (productId, imageUrl) =>
-  await api.post(`/products/${productId}/images`, { imageUrl }).then(res => res.data);
+export const updateProductImages = async (productId, imageUrls) =>
+  await api.put(`/products/${productId}/images`, imageUrls).then(res => res.data);
 
-export const deleteProductImage = async (productId, imageId) =>
-  await api.delete(`/products/${productId}/images/${imageId}`);
+// export const getProductImages = async (productId) =>
+//   await api.get(`/products/${productId}/images`).then(res => res.data);
+
+// export const addProductImage = async (productId, imageUrl) =>
+//   await api.post(`/products/${productId}/images`, { imageUrl }).then(res => res.data);
+
+// export const deleteProductImage = async (productId, imageId) =>
+//   await api.delete(`/products/${productId}/images/${imageId}`);
+
 //#endregion
 //#endregion
 

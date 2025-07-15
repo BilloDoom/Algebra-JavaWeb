@@ -31,6 +31,22 @@ public class ProductController {
         return ResponseEntity.ok(productService.getProductById(id));
     }
 
+    @GetMapping("/{id}/images")
+    public ResponseEntity<List<String>> getProductImageUrls(@PathVariable Long id) {
+        List<String> imageUrls = productService.getProductImageUrls(id);
+        return ResponseEntity.ok(imageUrls);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PutMapping("/{id}/images")
+    public ResponseEntity<ProductDto> updateProductImages(
+            @PathVariable Long id,
+            @RequestBody List<String> imageUrls
+    ) {
+        ProductDto updatedProduct = productService.updateProductImages(id, imageUrls);
+        return ResponseEntity.ok(updatedProduct);
+    }
+
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<ProductDto> createProduct(@RequestBody ProductDto request) {
