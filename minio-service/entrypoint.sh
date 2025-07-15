@@ -6,7 +6,7 @@ echo "Starting MINIO"
 
 # Wait until MinIO responds on port 9000
 echo "Waiting for MinIO to be ready..."
-until curl -s http://localhost:9000/minio/health/ready | grep -q "OK"; do
+until curl -s http://localhost:9000/minio/health/live | grep -q "OK"; do
   echo "Still waiting for MinIO..."
   sleep 2
 done
