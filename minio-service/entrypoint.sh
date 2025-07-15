@@ -4,26 +4,24 @@ echo "Starting MINIO"
 
 /usr/bin/minio server /data --console-address ":9001" &
 
-sleep 20
+TIMEOUT=60
+START=$(date +%s)
 
-# TIMEOUT=60
-# START=$(date +%s)
+while true; do
+  if curl -I http://127.0.0.1:9000/minio/health/live | grep -q "OK"; then
+    echo "MinIO is ready!"
+    break
+  fi
 
-# while true; do
-#   if curl -s http://127.0.0.1:9000/minio/health/ready | grep -q "OK"; then
-#     echo "MinIO is ready!"
-#     break
-#   fi
+  NOW=$(date +%s)
+  if [ $((NOW - START)) -ge $TIMEOUT ]; then
+    echo "wating for $TIMEOUT"
+    exit 1
+  fi
 
-#   NOW=$(date +%s)
-#   if [ $((NOW - START)) -ge $TIMEOUT ]; then
-#     echo "MinIO did not become ready in $TIMEOUT seconds."
-#     exit 1
-#   fi
-
-#   echo "⏳ Waiting for MinIO to be ready..."
-#   sleep 2
-# done
+  echo "Waiting for MinIO to be ready..."
+  sleep 2
+done
 
 
 echo "MinIO is ready. Creating buckets..."
