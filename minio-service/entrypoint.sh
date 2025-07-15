@@ -17,7 +17,7 @@ while true; do
   if [ $((NOW - START)) -ge $TIMEOUT ]; then
     echo "wating for $TIMEOUT"
     exit 1
-  fi
+  fis
 
   echo "Waiting for MinIO to be ready..."
   sleep 2
@@ -26,17 +26,30 @@ done
 
 echo "MinIO is ready. Creating buckets..."
 
-mc alias set local http://localhost:9000 $MINIO_ROOT_USER $MINIO_ROOT_PASSWORD
-
+echo " "
+echo "BUCKETS NEED TO BE SETUP MANUALLY"
+echo " "
+echo "For setup run:"
+echo "mc alias set local <host> <user> <password>"
+echo "mc mb local/<bucket-name>"
+echo "mc anonymous set download local/<bucket-name>"
+echo " "
+echo "Needed buckets:"
 for BUCKET in product-images category-images user-icons; do
-  if ! mc ls local/$BUCKET > /dev/null 2>&1; then
-    mc mb local/$BUCKET
-    mc anonymous set download local/$BUCKET
-    echo "Bucket $BUCKET created and made public."
-  else
-    echo "Bucket $BUCKET already exists."
-  fi
+  echo "$BUCKET"
 done
+echo " "
 
-# Keep container running
+# mc alias set local http://localhost:9000 $MINIO_ROOT_USER $MINIO_ROOT_PASSWORD
+
+# for BUCKET in product-images category-images user-icons; do
+#   if ! mc ls local/$BUCKET > /dev/null 2>&1; then
+#     mc mb local/$BUCKET
+#     mc anonymous set download local/$BUCKET
+#     echo "Bucket $BUCKET created and made public."
+#   else
+#     echo "Bucket $BUCKET already exists."
+#   fi
+# done
+
 wait

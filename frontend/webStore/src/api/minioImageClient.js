@@ -23,7 +23,7 @@ export async function uploadProductImage(productId, file) {
         throw new Error(`Upload failed: ${err.message}`);
     }
 
-    const publicUrl = `http://localhost:9000/${BUCKET_NAME}/${filePath}`;
+    const publicUrl = `https://algebra-javaweb-image-service.onrender.com/${BUCKET_NAME}/${filePath}`;
 
     // Fetch current product
     const product = await getProductById(productId);
