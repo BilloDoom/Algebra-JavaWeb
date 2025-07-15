@@ -4,23 +4,26 @@ echo "Starting MINIO"
 
 /usr/bin/minio server /data --console-address ":9001" &
 
-sleep 5
+# Wait until MinIO responds on port 9000
+echo "Waiting for MinIO to be ready..."
+until curl -s http://localhost:9000/minio/health/ready | grep -q "OK"; do
+  echo "Still waiting for MinIO..."
+  sleep 2
+done
+
+echo "MinIO is ready. Creating buckets..."
 
 mc alias set local http://localhost:9000 $MINIO_ROOT_USER $MINIO_ROOT_PASSWORD
 
-create_bucket() {
-  BUCKET_NAME=$1
-  if ! mc ls local/$BUCKET_NAME > /dev/null 2>&1; then
-    mc mb local/$BUCKET_NAME
-    mc anonymous set download local/$BUCKET_NAME
-    echo "Bucket $BUCKET_NAME created and made public."
+for BUCKET in product-images category-images user-icons; do
+  if ! mc ls local/$BUCKET > /dev/null 2>&1; then
+    mc mb local/$BUCKET
+    mc anonymous set download local/$BUCKET
+    echo "Bucket $BUCKET created and made public."
   else
-    echo "Bucket $BUCKET_NAME already exists."
+    echo "Bucket $BUCKET already exists."
   fi
-}
+done
 
-create_bucket "product-images"
-create_bucket "category-images"
-create_bucket "user-icons"
-
+# Keep container running
 wait
