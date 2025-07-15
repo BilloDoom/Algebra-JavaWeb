@@ -60,11 +60,15 @@ public class ProductService {
         Product savedProduct = productRepository.save(productEntity);
 
         if (productDto.getImages() != null) {
-            savedProduct.getImages().clear();
-            savedProduct.getImages().addAll(SaveImages(productDto, savedProduct));
+            List<ProductImage> newImages = SaveImages(productDto, savedProduct);
+            for (ProductImage newImage : newImages) {
+                savedProduct.getImages().add(newImage);
+                newImage.setProduct(savedProduct);
+            }
+            savedProduct = productRepository.save(savedProduct);
         }
 
-        return MapperUtils.map(productRepository.save(savedProduct), ProductDto.class);
+        return MapperUtils.map(savedProduct, ProductDto.class);
     }
 
     @Transactional
@@ -78,11 +82,19 @@ public class ProductService {
         MapperUtils.mapToExisting(productDto, product);
 
         if (productDto.getImages() != null) {
+            List<ProductImage> deletedImages = deleteImagesAndReturnList(product.getId());
+
             product.getImages().clear();
-            product.getImages().addAll(SaveImages(productDto, product));
+
+            List<ProductImage> newImages = SaveImages(productDto, product);
+            for (ProductImage newImage : newImages) {
+                product.getImages().add(newImage);
+                newImage.setProduct(product);
+            }
         }
 
-        return MapperUtils.map(productRepository.save(product), ProductDto.class);
+        Product saved = productRepository.save(product);
+        return MapperUtils.map(saved, ProductDto.class);
     }
 
     public boolean deleteProduct(Long id) {
@@ -103,5 +115,13 @@ public class ProductService {
                     image.setProduct(savedProduct);
                     return image;
                 }).toList();
+    }
+
+    public List<ProductImage> deleteImagesAndReturnList(Long productId) {
+        List<ProductImage> images = productImageRepository.findAllByProductId(productId);
+
+        productImageRepository.deleteAll(images);
+
+        return images;
     }
 }

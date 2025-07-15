@@ -15,6 +15,7 @@ export function AuthProvider({ children }) {
         setUser(JSON.parse(storedUser));
       } catch (e) {
         localStorage.removeItem("user");
+        localStorage.removeItem("userId");
       }
     }
   }, []);
@@ -29,6 +30,7 @@ export function AuthProvider({ children }) {
   const logout = () => {
     setUser(null);
     localStorage.removeItem("user");
+    localStorage.removeItem("userId");
   };
 
   return (

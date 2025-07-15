@@ -1,9 +1,12 @@
 package good.stuff.backend.common.model.product;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import good.stuff.backend.common.model.base.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.Objects;
 
 @Entity
 @Table(name = "product_images")
@@ -21,3 +24,4 @@ public class ProductImage extends BaseEntity {
     @JsonBackReference
     private Product product;
 }
+

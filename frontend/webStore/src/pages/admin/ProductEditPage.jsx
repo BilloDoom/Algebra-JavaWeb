@@ -8,7 +8,7 @@ import {
   getAllProducts,
 } from "../../api/api";
 import ProductFormModal from "../../components/ProductFormModal";
-import { uploadProductImage } from "../../api/supabaseImageClient";
+import { uploadProductImage } from "../../api/minioImageClient";
 
 export default function AdminProductPage() {
   const [products, setProducts] = useState([]);
