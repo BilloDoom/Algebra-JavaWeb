@@ -6,7 +6,7 @@ import {
   updateAddress,
   getUserOrders,
   getProfile,
-} from "../../api/api"; // Assume these exist or you add them
+} from "../../api/api";
 
 export default function ProfilePage() {
   const userId = localStorage.getItem("userId");
@@ -19,31 +19,28 @@ export default function ProfilePage() {
     country: "",
   };
 
-  // Addresses state
   const [addresses, setAddresses] = useState([]);
   const [newAddress, setNewAddress] = useState({ ...blankAddress });
   const [editingIndex, setEditingIndex] = useState(null);
   const [editedAddress, setEditedAddress] = useState({ ...blankAddress });
+  const [showAddForm, setShowAddForm] = useState(false);
 
-  // Orders state
   const [orders, setOrders] = useState([]);
   const [orderFilter, setOrderFilter] = useState("ALL");
   const [loadingOrders, setLoadingOrders] = useState(false);
 
-  // Profile details state
   const [profile, setProfile] = useState(null);
   const [loadingProfile, setLoadingProfile] = useState(false);
 
-  // Load addresses, orders, profile on mount
+  const maxAdresses = 1;
+
   useEffect(() => {
     if (!userId) return;
-
     fetchAddresses();
     fetchOrders();
     fetchProfile();
   }, []);
 
-  // Fetch addresses
   const fetchAddresses = async () => {
     try {
       const data = await getAddresses(userId);
@@ -53,17 +50,11 @@ export default function ProfilePage() {
     }
   };
 
-  // Fetch orders with filtering
   const fetchOrders = async (status = "ALL") => {
     setLoadingOrders(true);
     try {
-      // Assuming your API supports filter param or filter locally
       const data = await getUserOrders(userId);
-      if (status !== "ALL") {
-        setOrders(data.filter((o) => o.status === status));
-      } else {
-        setOrders(data);
-      }
+      setOrders(status === "ALL" ? data : data.filter((o) => o.status === status));
     } catch (error) {
       console.error("Error fetching orders:", error);
     } finally {
@@ -71,7 +62,6 @@ export default function ProfilePage() {
     }
   };
 
-  // Fetch profile info
   const fetchProfile = async () => {
     setLoadingProfile(true);
     try {
@@ -84,13 +74,11 @@ export default function ProfilePage() {
     }
   };
 
-  // Address handlers (same as before)
   const handleAddAddress = async () => {
-    if (addresses.length >= 4) {
-      alert("You can only have up to 4 addresses.");
+    if (addresses.length >= maxAdresses) {
+      alert("You can only have up to " + maxAdresses + " addresses.");
       return;
     }
-
     try {
       const newAddr = await addAddress(userId, newAddress);
       setAddresses([...addresses, newAddr]);
@@ -111,10 +99,7 @@ export default function ProfilePage() {
 
   const handleEditAddress = async (id) => {
     try {
-      const updated = await updateAddress(userId, {
-        ...editedAddress,
-        id,
-      });
+      const updated = await updateAddress(userId, { ...editedAddress, id });
       const updatedList = addresses.map((a) => (a.id === id ? updated : a));
       setAddresses(updatedList);
       setEditingIndex(null);
@@ -124,35 +109,34 @@ export default function ProfilePage() {
     }
   };
 
-  // Render address form inputs
   const renderAddressInputs = (address, setAddress) => (
-    <div className="flex flex-col gap-2">
+    <div className="form">
       <input
-        className="border rounded px-3 py-2"
+        className="input"
         placeholder="Street"
         value={address.street}
         onChange={(e) => setAddress({ ...address, street: e.target.value })}
       />
       <input
-        className="border rounded px-3 py-2"
+        className="input"
         placeholder="City"
         value={address.city}
         onChange={(e) => setAddress({ ...address, city: e.target.value })}
       />
       <input
-        className="border rounded px-3 py-2"
+        className="input"
         placeholder="State"
         value={address.state}
         onChange={(e) => setAddress({ ...address, state: e.target.value })}
       />
       <input
-        className="border rounded px-3 py-2"
+        className="input"
         placeholder="ZIP"
         value={address.zip}
         onChange={(e) => setAddress({ ...address, zip: e.target.value })}
       />
       <input
-        className="border rounded px-3 py-2"
+        className="input"
         placeholder="Country"
         value={address.country}
         onChange={(e) => setAddress({ ...address, country: e.target.value })}
@@ -161,184 +145,176 @@ export default function ProfilePage() {
   );
 
   return (
-    <div className="max-w-5xl mx-auto p-6 space-y-10">
-      <h1 className="text-3xl font-bold mb-4">My Profile</h1>
+    <div className="page-container">
+      <div className="profile-layout">
+        {/* Left Column */}
+        <div className="left-column">
+          {/* Profile Section */}
+          <section className="section">
+            {loadingProfile ? (
+              <p>Loading profile...</p>
+            ) : profile ? (
+              <div>
+                <p><strong>Username:</strong> {profile.username}</p>
+                <p><strong>Email:</strong> {profile.email}</p>
+                <p><strong>Role:</strong> {profile.role}</p>
+                <p><strong>Profile Picture:</strong> {profile.profilePictureUrl ? (
+                  <img
+                    src={profile.profilePictureUrl}
+                    alt="Profile"
+                    style={{ width: "60px", height: "60px", borderRadius: "50%" }}
+                  />
+                ) : (
+                  "None"
+                )}</p>
+              </div>
+            ) : (
+              <p>No profile info available.</p>
+            )}
+          </section>
 
-      {/* Addresses Section */}
-      <section>
-        <h2 className="text-2xl font-semibold mb-4">My Addresses</h2>
-
-        <ul className="space-y-4 mb-6">
-          {addresses.length === 0 && (
-            <li className="text-gray-600">No addresses added yet.</li>
-          )}
-
-          {addresses.map((addr, index) => (
-            <li
-              key={addr.id}
-              className="border rounded p-4 shadow-sm flex flex-col sm:flex-row sm:justify-between items-start sm:items-center"
-            >
-              {editingIndex === index ? (
-                <div className="flex-grow">
-                  {renderAddressInputs(editedAddress, setEditedAddress)}
-                  <div className="mt-3 space-x-2">
-                    <button
-                      onClick={() => handleEditAddress(addr.id)}
-                      className="btn btn-primary"
-                    >
-                      Save
-                    </button>
-                    <button
-                      onClick={() => setEditingIndex(null)}
-                      className="btn btn-secondary"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <>
-                  <div className="mb-3 sm:mb-0">
-                    {addr.street}, {addr.city}, {addr.state} {addr.zip},{" "}
-                    {addr.country}
-                  </div>
-                  <div className="space-x-2">
-                    <button
-                      onClick={() => {
-                        setEditingIndex(index);
-                        setEditedAddress(addr);
-                      }}
-                      className="btn btn-secondary"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDeleteAddress(addr.id)}
-                      className="btn btn-danger"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </>
+          {/* Addresses Section */}
+          <section className="section">
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <h2>Addresses</h2>
+              {addresses.length < maxAdresses && editingIndex === null && !showAddForm && (
+                <button className="btn" onClick={() => setShowAddForm(true)}>Add New Address</button>
               )}
-            </li>
-          ))}
-        </ul>
+            </div>
 
-        {addresses.length < 4 && (
-          <div className="border rounded p-4 shadow-sm max-w-md">
-            <h3 className="text-xl font-semibold mb-3">Add New Address</h3>
-            {renderAddressInputs(newAddress, setNewAddress)}
-            <button
-              onClick={handleAddAddress}
-              className="btn btn-primary mt-4 w-full"
-            >
-              Add Address
-            </button>
-          </div>
-        )}
-      </section>
+            <div className="address-list">
+              {addresses.map((addr, index) => (
+                <div key={addr.id} className="address-card">
+                  {editingIndex === index ? (
+                    <>
+                      {renderAddressInputs(editedAddress, setEditedAddress)}
+                      <div style={{ marginTop: "10px" }}>
+                        <button className="btn" onClick={() => handleEditAddress(addr.id)}>Save</button>
+                        <button
+                          className="btn"
+                          onClick={() => {
+                            setEditingIndex(null);
+                            setEditedAddress({ ...blankAddress });
+                          }}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div style={{ display: "flex", justifyContent: "space-between" }}>
+                        <p>Street: </p>
+                        <p>{addr.street}</p>
+                      </div>
+                      <hr />
+                      <div style={{ display: "flex", justifyContent: "space-between" }}>
+                        <p>City: </p>
+                        <p>{addr.city}</p>
+                      </div>
+                      <hr />
+                      <div style={{ display: "flex", justifyContent: "space-between" }}>
+                        <p>State: </p>
+                        <p>{addr.state}</p>
+                      </div>
+                      <hr />
+                      <div style={{ display: "flex", justifyContent: "space-between" }}>
+                        <p>ZIP: </p>
+                        <p>{addr.zip}</p>
+                      </div>
+                      <hr />
+                      <div style={{ display: "flex", justifyContent: "space-between" }}>
+                        <p>Country: </p>
+                        <p>{addr.country}</p>
+                      </div>
+                      <hr />
+                      <div style={{ marginTop: "10px" }}>
+                        <button
+                          className="btn"
+                          onClick={() => {
+                            setEditingIndex(index);
+                            setEditedAddress(addr);
+                            setShowAddForm(false);
+                          }}
+                        >
+                          Edit
+                        </button>
+                        <button className="btn btn-delete" onClick={() => handleDeleteAddress(addr.id)}>Delete</button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              ))}
+            </div>
 
-      {/* Orders Section */}
-      <section className="bg-white rounded shadow p-6">
-        <h2 className="text-2xl font-semibold mb-4">My Orders</h2>
+            {showAddForm && (
+              <div className="address-form">
+                <h4>Add New Address</h4>
+                {renderAddressInputs(newAddress, setNewAddress)}
+                <div style={{ marginTop: "10px" }}>
+                  <button className="btn" onClick={handleAddAddress}>Add Address</button>
+                  <button
+                    className="btn"
+                    onClick={() => {
+                      setShowAddForm(false);
+                      setNewAddress({ ...blankAddress });
+                    }}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
+          </section>
+        </div>
 
-        {/* Filters */}
-        <div className="mb-4 flex flex-wrap gap-3">
-          {["ALL", "PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED"].map(
-            (status) => (
+        {/* Right Column */}
+        <div className="right-column section">
+          <h2>My Orders</h2>
+
+          <div style={{ display: "flex" }}>
+            {["ALL", "PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED"].map((status) => (
               <button
                 key={status}
-                className={`btn ${orderFilter === status
-                    ? "btn-primary"
-                    : "btn-secondary"
-                  }`}
+                className={`btn ${orderFilter === status ? "" : "secondary"}`}
                 onClick={() => {
                   setOrderFilter(status);
                   fetchOrders(status);
                 }}
               >
-                {status.charAt(0) + status.slice(1).toLowerCase()}
+                {status}
               </button>
-            )
+            ))}
+          </div>
+          <hr></hr>
+
+          {loadingOrders ? (
+            <p>Loading orders...</p>
+          ) : orders.length === 0 ? (
+            <p>No orders found for selected filter.</p>
+          ) : (
+            <ul style={{ listStyle: "none", padding: 0, maxHeight: "600px", overflowY: "auto", gap: "10px" }}>
+              {orders.map((order) => (
+                <li
+                  key={order.id}
+                  className="user-order-item"
+                >
+                  <p><strong>Status:</strong> <span style={{
+                    color:
+                      order.status === "DELIVERED" ? "green" :
+                        order.status === "CANCELLED" ? "red" : "orange",
+                    fontWeight: "bold"
+                  }}>{order.status}</span></p>
+                  <p><strong>Total:</strong> ${order.totalAmount.toFixed(2)}</p>
+                  <p><strong>Destination:</strong> {order.shippingAddress}</p>
+                  <button className="btn" style={{ marginTop: "10px" }}>View Details</button>
+                </li>
+              ))}
+            </ul>
           )}
         </div>
-
-        {loadingOrders ? (
-          <p>Loading orders...</p>
-        ) : orders.length === 0 ? (
-          <p>No orders found for selected filter.</p>
-        ) : (
-          <ul className="space-y-4 max-h-96 overflow-auto">
-            {orders.map((order) => (
-              <li
-                key={order.id}
-                className="border rounded p-4 shadow-sm flex flex-col sm:flex-row justify-between"
-              >
-                <div>
-                  <p>
-                    <span className="font-semibold">Order ID:</span> {order.id}
-                  </p>
-                  <p>
-                    <span className="font-semibold">Status:</span>{" "}
-                    <span
-                      className={`font-bold ${order.status === "DELIVERED"
-                          ? "text-green-600"
-                          : order.status === "CANCELLED"
-                            ? "text-red-600"
-                            : "text-yellow-600"
-                        }`}
-                    >
-                      {order.status}
-                    </span>
-                  </p>
-                  <p>
-                    <span className="font-semibold">Total:</span> ${order.totalAmount.toFixed(2)}
-                  </p>
-                  <p>
-                    <span className="font-semibold">Shipping:</span> {order.shippingAddress}
-                  </p>
-                </div>
-                <div className="mt-3 sm:mt-0 sm:text-right">
-                  {/* You can add order details, buttons here */}
-                  <button className="btn btn-secondary">View Details</button>
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
-
-      {/* Profile Info Section */}
-      <section className="bg-pink-50 rounded shadow p-6 max-w-md">
-        <h2 className="text-2xl font-semibold mb-4">Profile Info</h2>
-
-        {loadingProfile ? (
-          <p>Loading profile...</p>
-        ) : profile ? (
-          <div className="space-y-3 text-gray-800">
-            <p>
-              <span className="font-semibold">Username:</span> {profile.username}
-            </p>
-            <p>
-              <span className="font-semibold">Email:</span> {profile.email}
-            </p>
-            <p>
-              <span className="font-semibold">Role:</span> {profile.role}
-            </p>
-            <p>
-              <span className="font-semibold">Profile Picture:</span>{" "}
-              {profile.profilePictureUrl ? (
-                <img src={profile.profilePictureUrl} alt="Profile" className="w-16 h-16 rounded-full" />
-              ) : (
-                "None"
-              )}
-            </p>
-          </div>
-        ) : (
-          <p>No profile info available.</p>
-        )}
-      </section>
+      </div>
     </div>
   );
+
 }

@@ -31,12 +31,12 @@ export const navLinks = [
         separator: true,
         public: true,
     },
-    {
-        text: "Categories",
-        href: "/categories",
-        icon: Grid2X2,
-        public: true,
-    },
+    // {
+    //     text: "Categories",
+    //     href: "/categories",
+    //     icon: Grid2X2,
+    //     public: true,
+    // },
     {
         text: "Edit Categories",
         href: "/categories/new",
@@ -45,7 +45,7 @@ export const navLinks = [
     },
     {
         separator: true,
-        public: true,
+        public: false,
     },
     {
         text: "Logs",
@@ -53,16 +53,24 @@ export const navLinks = [
         icon: ScanEye,
         public: false,
     },
+    // {
+    //     text: "Users",
+    //     href: "/home",
+    //     icon: Users,
+    //     public: false,
+    // },
     {
-        text: "Users",
-        href: "/home",
-        icon: Users,
+        separator: true,
         public: false,
     },
-        {
+    {
         text: "Cart",
         href: "/cart",
         icon: BaggageClaim,
+        public: true,
+    },
+    {
+        separator: true,
         public: true,
     },
 ];

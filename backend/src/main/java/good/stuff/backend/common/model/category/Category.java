@@ -22,6 +22,6 @@ public class Category extends BaseEntity {
     @OneToMany(mappedBy = "category")
     private List<Product> products;
 
-    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<CategoryImage> images;
+    @Column(name = "image_urls", columnDefinition = "text")
+    private String imageUrls;
 }

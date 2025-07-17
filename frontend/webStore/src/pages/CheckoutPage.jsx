@@ -16,7 +16,6 @@ export default function CheckoutPage() {
     setIsLoggedIn(!!token);
 
     if (token && userId) {
-      // Load cart
       getCart()
         .then((data) => {
           const mappedCart = data.map((item) => ({
@@ -32,17 +31,14 @@ export default function CheckoutPage() {
         })
         .catch(() => alert("Failed to load cart from database"));
 
-      // Load addresses
       getAddresses(userId)
         .then((data) => {
           setAddresses(data);
           if (data.length === 1) {
             setSelectedAddress(data[0]);
           } else if (data.length > 1) {
-            // Multiple addresses - for now leave selectedAddress null
             setSelectedAddress(null);
           } else {
-            // No addresses - show modal to add new
             setShowAddressModal(true);
           }
         })
@@ -51,7 +47,6 @@ export default function CheckoutPage() {
           setShowAddressModal(true);
         });
     } else {
-      // Guest user - load cart from localStorage
       const stored = JSON.parse(localStorage.getItem("cart") || "[]");
       setCart(
         stored.map((p) => ({
@@ -68,14 +63,9 @@ export default function CheckoutPage() {
 
   const handleCreateOrder = async (paymentType) => {
     const userId = localStorage.getItem("userId");
-    if (!userId) {
-      alert("You must be logged in to create an order.");
-      return;
-    }
-    if (!selectedAddress) {
-      alert("Please select or add a shipping address.");
-      return;
-    }
+    if (!userId) return alert("You must be logged in to create an order.");
+    if (!selectedAddress) return alert("Please select or add a shipping address.");
+
     try {
       await createOrder({
         userId,
@@ -83,12 +73,9 @@ export default function CheckoutPage() {
         paymentType,
       });
       alert("Order created successfully!");
-      // Clear cart in state
       setCart([]);
-      // Clear cart in localStorage for guests
       localStorage.removeItem("cart");
-      // TODO: Redirect to order confirmation page if needed
-    } catch (error) {
+    } catch {
       alert("Failed to create order.");
     }
   };
@@ -99,19 +86,14 @@ export default function CheckoutPage() {
       setShowAddressModal(true);
       return;
     }
-    // Call create order with payment type CASH
     await handleCreateOrder("CASH");
   };
 
   const handleAddAddress = async () => {
     const userId = localStorage.getItem("userId");
-    if (!userId) {
-      alert("User not logged in.");
-      return;
-    }
+    if (!userId) return alert("User not logged in.");
     if (!newAddress.street || !newAddress.city || !newAddress.zip || !newAddress.country) {
-      alert("Please fill all address fields.");
-      return;
+      return alert("Please fill all address fields.");
     }
     try {
       const savedAddress = await addAddress(userId, newAddress);
@@ -119,148 +101,174 @@ export default function CheckoutPage() {
       setSelectedAddress(savedAddress);
       setShowAddressModal(false);
       setNewAddress({ street: "", city: "", zip: "", country: "" });
-    } catch (err) {
+    } catch {
       alert("Failed to save address.");
     }
   };
 
   return (
-    <div className="p-4 max-w-4xl mx-auto">
-      <h1 className="text-2xl font-semibold mb-4">Checkout</h1>
+    <div className="page-container">
+      <h1 className="section-title">Checkout</h1>
 
-      {/* Address Display */}
-      <section className="mb-6 p-4 border rounded">
-        <h2 className="font-semibold mb-2">Shipping Address</h2>
-        {selectedAddress ? (
-          <div>
-            <p>{selectedAddress.street}</p>
-            <p>
-              {selectedAddress.city}, {selectedAddress.zip}
-            </p>
-            <p>{selectedAddress.country}</p>
-          </div>
-        ) : addresses.length > 1 ? (
-          <p>Please select an address (feature coming soon).</p>
-        ) : (
-          <p>No address selected.</p>
-        )}
-        <button
-          className="btn btn-secondary mt-2"
-          onClick={() => setShowAddressModal(true)}
-        >
-          {addresses.length === 0 ? "Add Address" : "Change Address"}
-        </button>
-      </section>
-
-      {cart.length === 0 ? (
-        <p>Your cart is empty.</p>
-      ) : (
-        <>
-          <div className="space-y-4 mb-6">
-            {cart.map((item) => (
-              <div
-                key={item.id || item.productId}
-                className="border p-4 rounded shadow-sm"
-              >
-                <p className="font-medium">{item.name || "Unnamed Product"}</p>
-                <p>Quantity: {item.quantity}</p>
-                <p>Price: ${(item.price * item.quantity).toFixed(2)}</p>
+      <div className="checkout-layout" style={{ display: "flex", gap: "20px", alignItems: "flex-start" }}>
+        {/* LEFT: Shipping Address */}
+        <div className="checkout-left" style={{ flex: "1", minWidth: "250px" }}>
+          <div className="section">
+            <h2>Shipping Address</h2>
+            {selectedAddress ? (
+              <div>
+                <div style={{ display: "flex", justifyContent: "space-between" }}>
+                  <p>Street: </p>
+                  <p>{selectedAddress.street}</p>
+                </div>
+                <hr />
+                <div style={{ display: "flex", justifyContent: "space-between" }}>
+                  <p>City: </p>
+                  <p>{selectedAddress.city}</p>
+                </div>
+                <hr />
+                <div style={{ display: "flex", justifyContent: "space-between" }}>
+                  <p>State: </p>
+                  <p>{selectedAddress.state}</p>
+                </div>
+                <hr />
+                <div style={{ display: "flex", justifyContent: "space-between" }}>
+                  <p>ZIP: </p>
+                  <p>{selectedAddress.zip}</p>
+                </div>
+                <hr />
+                <div style={{ display: "flex", justifyContent: "space-between" }}>
+                  <p>Country: </p>
+                  <p>{selectedAddress.country}</p>
+                </div>
+                <hr />
               </div>
-            ))}
+            ) : addresses.length > 1 ? (
+              <p>Please select an address (feature coming soon).</p>
+            ) : (
+              <p>No address selected.</p>
+            )}
+            <button onClick={() => setShowAddressModal(true)} style={{ marginTop: "10px" }}>
+              {addresses.length === 0 ? "Add Address" : "Change Address"}
+            </button>
           </div>
+        </div>
 
-          <div className="text-right mb-6">
-            <p className="text-xl font-bold">Total: ${getTotal().toFixed(2)}</p>
-          </div>
+        {/* MIDDLE: Products */}
+        <div
+          className="checkout-middle section"
+          style={{
+            flex: "2",
+            maxHeight: "500px",
+            overflowY: "auto",
+            padding: "15px",
+          }}
+        >
+          {cart.length === 0 ? (
+            <p>Your cart is empty.</p>
+          ) : (
+            cart.map((item) => (
+              <div key={item.id || item.productId} style={{ marginBottom: "20px", borderBottom: "1px solid #ddd", paddingBottom: "10px" }}>
+                <h4>{item.name}</h4>
+                <p className="q-checkout">Quantity: {item.quantity}</p>
+                <p className="price-checkout">Total: ${(item.price * item.quantity).toFixed(2)}</p>
+              </div>
+            ))
+          )}
+        </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
+        {/* RIGHT: Total & Payment */}
+        <div className="checkout-right" style={{ flex: "1", minWidth: "250px" }}>
+          <div
+            className="section"
+            style={{
+              padding: "15px",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "stretch",
+              gap: "15px",
+            }}
+          >
+            <div style={{ fontSize: "1.2rem", fontWeight: "bold", textAlign: "center", background: "rgba(255, 255, 255, 0.03)", padding: ".5rem" }}>
+              Total: ${getTotal().toFixed(2)}
+            </div>
+
             <button
               onClick={handleCashPayment}
-              className="w-full py-2 bg-green-600 text-white rounded hover:bg-green-700"
+              disabled={cart.length === 0}
+              style={{
+                padding: "10px",
+                fontSize: "16px",
+                backgroundColor: cart.length === 0 ? "#ccc" : "#28a745",
+                color: "#fff",
+                border: "none",
+                borderRadius: "4px",
+                cursor: cart.length === 0 ? "not-allowed" : "pointer",
+              }}
             >
               Pay with Cash
             </button>
 
-            <PayPalScriptProvider options={{
-              "client-id": "AQ2ByBtWUqWORMonUwblwgL-oEpaOvqvhn50n7l4MGT1YnPgo6KTimOqNXD8wV-gIxb-gKNsf_uuiTnE",
-              currency: "EUR"
-            }}>
+            <PayPalScriptProvider
+              options={{
+                "client-id": "AQ2ByBtWUqWORMonUwblwgL-oEpaOvqvhn50n7l4MGT1YnPgo6KTimOqNXD8wV-gIxb-gKNsf_uuiTnE",
+                currency: "EUR",
+              }}
+            >
               <PayPalButtons
                 style={{ layout: "vertical" }}
-                createOrder={(data, actions) => {
-                  return actions.order.create({
-                    purchase_units: [
-                      {
-                        amount: {
-                          value: getTotal().toFixed(2),
-                        },
-                      },
-                    ],
-                  });
-                }}
+                createOrder={(data, actions) =>
+                  actions.order.create({
+                    purchase_units: [{ amount: { value: getTotal().toFixed(2) } }],
+                  })
+                }
                 onApprove={async (data, actions) => {
                   const details = await actions.order.capture();
-                  alert("Payment completed by " + details.payer.name.given_name);
-                  // After payment success, create order with payment type PAYPAL
+                  alert(`Payment completed by ${details.payer.name.given_name}`);
                   await handleCreateOrder("PAYPAL");
                 }}
+                disabled={cart.length === 0}
               />
             </PayPalScriptProvider>
           </div>
-        </>
-      )}
+        </div>
+      </div>
 
       {/* Address Modal */}
       {showAddressModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded max-w-md w-full">
-            <h3 className="text-lg font-semibold mb-4">Add Shipping Address</h3>
-            <input
-              type="text"
-              placeholder="Street"
-              className="input mb-2 w-full"
-              value={newAddress.street}
-              onChange={(e) =>
-                setNewAddress((prev) => ({ ...prev, street: e.target.value }))
-              }
-            />
-            <input
-              type="text"
-              placeholder="City"
-              className="input mb-2 w-full"
-              value={newAddress.city}
-              onChange={(e) =>
-                setNewAddress((prev) => ({ ...prev, city: e.target.value }))
-              }
-            />
-            <input
-              type="text"
-              placeholder="ZIP / Postal Code"
-              className="input mb-2 w-full"
-              value={newAddress.zip}
-              onChange={(e) =>
-                setNewAddress((prev) => ({ ...prev, zip: e.target.value }))
-              }
-            />
-            <input
-              type="text"
-              placeholder="Country"
-              className="input mb-4 w-full"
-              value={newAddress.country}
-              onChange={(e) =>
-                setNewAddress((prev) => ({ ...prev, country: e.target.value }))
-              }
-            />
-            <div className="flex justify-end gap-2">
-              <button
-                className="btn btn-secondary"
-                onClick={() => setShowAddressModal(false)}
-              >
-                Cancel
-              </button>
-              <button className="btn btn-primary" onClick={handleAddAddress}>
-                Save Address
-              </button>
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h3>Add Shipping Address</h3>
+            <div className="form">
+              <input
+                type="text"
+                placeholder="Street"
+                value={newAddress.street}
+                onChange={(e) => setNewAddress((prev) => ({ ...prev, street: e.target.value }))}
+              />
+              <input
+                type="text"
+                placeholder="City"
+                value={newAddress.city}
+                onChange={(e) => setNewAddress((prev) => ({ ...prev, city: e.target.value }))}
+              />
+              <input
+                type="text"
+                placeholder="ZIP / Postal Code"
+                value={newAddress.zip}
+                onChange={(e) => setNewAddress((prev) => ({ ...prev, zip: e.target.value }))}
+              />
+              <input
+                type="text"
+                placeholder="Country"
+                value={newAddress.country}
+                onChange={(e) => setNewAddress((prev) => ({ ...prev, country: e.target.value }))}
+              />
+
+              <div className="form-buttons" style={{ marginTop: "10px" }}>
+                <button onClick={() => setShowAddressModal(false)}>Cancel</button>
+                <button onClick={handleAddAddress}>Save Address</button>
+              </div>
             </div>
           </div>
         </div>

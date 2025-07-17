@@ -34,7 +34,6 @@ export default function CartPage() {
 
     } else {
       const stored = JSON.parse(localStorage.getItem("cart") || "[]");
-      // Ensure quantity defaults to 1 and price is defined (default 0)
       setCart(
         stored.map(p => ({
           ...p,
@@ -79,52 +78,61 @@ export default function CartPage() {
     cart.reduce((acc, item) => acc + (item.price || 0) * item.quantity, 0);
 
   return (
-    <div className="p-4 max-w-4xl mx-auto">
-      <h1 className="text-2xl font-semibold mb-4">Your Cart</h1>
+    <div className="page-container p-4 max-width-4xl">
+      <h1 className="section-title">Your Cart</h1>
 
       {cart.length === 0 ? (
         <p>Your cart is empty.</p>
       ) : (
         <>
-          <table className="w-full text-left border">
+          <table className="section" style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
               <tr>
-                <th className="p-2 border-b">Product</th>
-                <th className="p-2 border-b">Price</th>
-                <th className="p-2 border-b">Quantity</th>
-                <th className="p-2 border-b">Total</th>
-                <th className="p-2 border-b">Actions</th>
+                <th style={{ padding: "0.75rem", borderBottom: "1px solid rgba(255,255,255,0.1)", textAlign: "left" }}>Product</th>
+                <th style={{ padding: "0.75rem", borderBottom: "1px solid rgba(255,255,255,0.1)", textAlign: "left" }}>Price</th>
+                <th style={{ padding: "0.75rem", borderBottom: "1px solid rgba(255,255,255,0.1)", textAlign: "left" }}>Quantity</th>
+                <th style={{ padding: "0.75rem", borderBottom: "1px solid rgba(255,255,255,0.1)", textAlign: "left" }}>Total</th>
+                <th style={{ padding: "0.75rem", borderBottom: "1px solid rgba(255,255,255,0.1)", textAlign: "left" }}>Actions</th>
               </tr>
             </thead>
             <tbody>
               {cart.map((item) => (
                 <tr key={item.id}>
-                  <td className="p-2 border-b">{item.name || "Unnamed Product"}</td>
-                  <td className="p-2 border-b">
+                  <td style={{ padding: "0.75rem", borderBottom: "1px solid rgba(255,255,255,0.1)" }}>{item.name || "Unnamed Product"}</td>
+                  <td style={{ padding: "0.75rem", borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
                     {typeof item.price === "number"
                       ? `$${item.price.toFixed(2)}`
                       : "N/A"}
                   </td>
-                  <td className="p-2 border-b">
+                  <td style={{ padding: "0.75rem", borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
                     <input
                       type="number"
                       value={item.quantity}
                       min={1}
-                      className="w-16 border px-2 py-1"
+                      className="quantity-input"
                       onChange={(e) =>
                         handleQuantityChange(item.id, Number(e.target.value))
                       }
+                      style={{
+                        width: "60px",
+                        padding: "0.4rem 0.6rem",
+                        background: "rgba(255, 255, 255, 0.02)",
+                        border: "1px solid rgba(255, 255, 255, 0.1)",
+                        color: "#f2f2f2",
+                        borderRadius: "0",
+                        outline: "none",
+                      }}
                     />
                   </td>
-                  <td className="p-2 border-b">
+                  <td style={{ padding: "0.75rem", borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
                     {typeof item.price === "number"
                       ? `$${(item.price * item.quantity).toFixed(2)}`
                       : "N/A"}
                   </td>
-                  <td className="p-2 border-b">
+                  <td style={{ padding: "0.75rem", borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
                     <button
                       onClick={() => handleRemove(item.id)}
-                      className="text-red-600 hover:underline"
+                      className="btn btn-delete"
                     >
                       Remove
                     </button>
@@ -134,12 +142,13 @@ export default function CartPage() {
             </tbody>
           </table>
 
-          <div className="text-right mt-4">
-            <p className="text-lg font-bold mb-2">
+          <div style={{ textAlign: "right", marginTop: "1rem" }}>
+            <p style={{ fontWeight: "bold", fontSize: "1.2rem", marginBottom: "0.5rem" }}>
               Total: ${getTotal().toFixed(2)}
             </p>
             <button
-              className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+              className="btn"
+              style={{ padding: "0.6rem 1.2rem", fontWeight: "600" }}
               onClick={() => navigate("/checkout")}
             >
               Checkout

@@ -10,17 +10,28 @@ export default function ProductCard({ product, onAddToCart }) {
     const [imageSrc, setImageSrc] = useState(null);
 
     useEffect(() => {
+        if (!product.images || product.images.length === 0) {
+            setImageError(true);
+            setImageLoaded(true);
+            return;
+        }
+
+        const imageUrl = product.images[0].imageUrl;
+
         const img = new Image();
-        img.src = `/images/products/${product.id}.jpg`;
+        img.src = imageUrl;
+        
         img.onload = () => {
-            setImageSrc(img.src);
+            console.log("Image loaded successfully:", imageUrl);
+            setImageSrc(imageUrl);
             setImageLoaded(true);
         };
         img.onerror = () => {
             setImageError(true);
             setImageLoaded(true);
         };
-    }, [product.id]);
+    }, [product.images]);
+
 
     return (
         <li className="product-card" onClick={() => navigate(`/products/${product.id}`)}>

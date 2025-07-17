@@ -11,10 +11,15 @@ const api = axios.create({
   },
 });
 
-//#region PRODUCT
-//export const getAllProducts = async () =>
-//    await api.get("/products").then(res => res.data);
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem("token");
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
 
+//#region PRODUCT
 export const getAllProducts = async (filters = {}) => {
   const query = new URLSearchParams();
 
@@ -38,23 +43,11 @@ export const updateProduct = async (id, product) =>
 export const deleteProduct = async (id) =>
   await api.delete(`/products/${id}`);
 
-//#region PRODUCT-IMAGES
 export const getProductImageUrls = async (productId) =>
   await api.get(`/products/${productId}/images`).then(res => res.data);
 
 export const updateProductImages = async (productId, imageUrls) =>
   await api.put(`/products/${productId}/images`, imageUrls).then(res => res.data);
-
-// export const getProductImages = async (productId) =>
-//   await api.get(`/products/${productId}/images`).then(res => res.data);
-
-// export const addProductImage = async (productId, imageUrl) =>
-//   await api.post(`/products/${productId}/images`, { imageUrl }).then(res => res.data);
-
-// export const deleteProductImage = async (productId, imageId) =>
-//   await api.delete(`/products/${productId}/images/${imageId}`);
-
-//#endregion
 //#endregion
 
 //#region CATEGORY
@@ -72,6 +65,25 @@ export const updateCategory = async (id, category) =>
 
 export const deleteCategory = async (id) =>
   await api.delete(`/categories/${id}`).then(res => res.data)
+//#endregion
+
+//#region IMAGES
+export const uploadImage = async ({ bucket, folder, file }) => {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const res = await api.post(`/images/upload/${bucket}/${folder}`, formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return res.data;
+};
+
+export const deleteImage = async ({ bucket, objectPath }) => {
+  const res = await api.delete("/images/delete", {
+    params: { bucket, objectPath },
+  });
+  return res.data;
+};
 //#endregion
 
 //#region RATINGS

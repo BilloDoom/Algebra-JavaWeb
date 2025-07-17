@@ -24,26 +24,9 @@ export default function FiltersPanel({ filters, categories, onChange, onReset })
         setLocalMax(value);
     };
 
+
     return (
         <div className="filters-panel">
-            <div>
-                <label htmlFor="category">Category</label>
-                <select
-                    id="category"
-                    name="categoryId"
-                    value={filters.categoryId}
-                    onChange={onChange}
-                    className="dropdown"
-                >
-                    <option value="">All Categories</option>
-                    {categories.map((cat) => (
-                        <option key={cat.id} value={cat.id}>
-                            {cat.name}
-                        </option>
-                    ))}
-                </select>
-            </div>
-
             <div>
                 <label>Price Range</label>
                 <div className="range-wrapper">

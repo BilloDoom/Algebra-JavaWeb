@@ -6,7 +6,7 @@ import good.stuff.backend.common.model.category.Category;
 import good.stuff.backend.common.model.product.Product;
 import good.stuff.backend.repository.CategoryRepository;
 import good.stuff.backend.repository.product.ProductRepository;
-import good.stuff.backend.utils.ImageXmlUtil;
+import good.stuff.backend.utils.XmlListUtil;
 import good.stuff.backend.utils.MapperUtils;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -53,7 +53,13 @@ public class ProductService {
         }
         productEntity.setCategory(category);
 
-        productEntity.setImageUrls(ImageXmlUtil.toXml(productDto.getImages()));
+        // Convert list of ProductImageDto to XML string
+        productEntity.setImageUrls(XmlListUtil.toXml(
+                productDto.getImages(),
+                "imageurls",
+                "url",
+                ProductImageDto::getImageUrl
+        ));
 
         Product savedProduct = productRepository.save(productEntity);
         return toDto(savedProduct);
@@ -72,7 +78,12 @@ public class ProductService {
 
         MapperUtils.mapToExisting(productDto, product);
 
-        product.setImageUrls(ImageXmlUtil.toXml(productDto.getImages()));
+        product.setImageUrls(XmlListUtil.toXml(
+                productDto.getImages(),
+                "imageurls",
+                "url",
+                ProductImageDto::getImageUrl
+        ));
 
         Product saved = productRepository.save(product);
         return toDto(saved);
@@ -91,18 +102,25 @@ public class ProductService {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new EntityNotFoundException("Product not found"));
 
-        return ImageXmlUtil.extractUrlStrings(product.getImageUrls());
+        return XmlListUtil.extractUrlStrings(product.getImageUrls());
     }
 
     private ProductDto toDto(Product product) {
         ProductDto dto = MapperUtils.map(product, ProductDto.class);
 
         if (product.getCategory() != null) {
-            dto.setCategory(MapperUtils.map(product.getCategory(), dto.getCategory() != null ? dto.getCategory().getClass() : null));
+            dto.setCategory(MapperUtils.map(
+                    product.getCategory(),
+                    dto.getCategory() != null ? dto.getCategory().getClass() : null
+            ));
             dto.getCategory().setName(product.getCategory().getName());
         }
 
-        List<ProductImageDto> images = ImageXmlUtil.fromXml(product.getImageUrls());
+        List<ProductImageDto> images = XmlListUtil.fromXml(
+                product.getImageUrls(),
+                "url",
+                ProductImageDto::new
+        );
         dto.setImages(images);
 
         return dto;
@@ -114,16 +132,18 @@ public class ProductService {
                 .orElseThrow(() -> new EntityNotFoundException("Product not found with id: " + productId));
 
         List<ProductImageDto> images = new ArrayList<>();
-        imageUrls.forEach(imageUrl -> {
-            images.add(new ProductImageDto(imageUrl));
-        });
+        imageUrls.forEach(imageUrl -> images.add(new ProductImageDto(imageUrl)));
 
-        String xmlImageUrls = ImageXmlUtil.toXml(images);
+        String xmlImageUrls = XmlListUtil.toXml(
+                images,
+                "imageurls",
+                "url",
+                ProductImageDto::getImageUrl
+        );
         product.setImageUrls(xmlImageUrls);
 
         Product saved = productRepository.save(product);
 
         return MapperUtils.map(saved, ProductDto.class);
     }
-
 }

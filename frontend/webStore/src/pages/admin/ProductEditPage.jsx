@@ -6,9 +6,9 @@ import {
   deleteProduct,
   getAllCategories,
   getAllProducts,
+  uploadImage,
 } from "../../api/api";
 import ProductFormModal from "../../components/ProductFormModal";
-import { uploadProductImage } from "../../api/minioImageClient";
 
 export default function AdminProductPage() {
   const [products, setProducts] = useState([]);
@@ -63,9 +63,17 @@ export default function AdminProductPage() {
     let productId = formData.id;
     let uploadedImageUrls = formData.images || [];
 
-    if (productId && imageFiles.length > 0) {
+    // Upload new image files if present
+    if (imageFiles.length > 0) {
       const newUrls = await Promise.all(
-        imageFiles.map(file => uploadProductImage(productId, file))
+        imageFiles.map(async (file) => {
+          const { url } = await uploadImage({
+            bucket: "product-images",
+            folder: "public",
+            file,
+          });
+          return url;
+        })
       );
       uploadedImageUrls = [...uploadedImageUrls, ...newUrls];
     }
@@ -73,7 +81,7 @@ export default function AdminProductPage() {
     const payload = {
       ...formData,
       categoryId: formData.category?.id,
-      images: uploadedImageUrls
+      images: uploadedImageUrls,
     };
 
     if (productId) {
@@ -81,24 +89,13 @@ export default function AdminProductPage() {
       alert("Product updated.");
     } else {
       const created = await createProduct(payload);
-      productId = created.id;
-
-      // Upload images *after* creation
-      const newUrls = await Promise.all(
-        imageFiles.map(file => uploadProductImage(productId, file))
-      );
-      // Optional: update again to attach image URLs
-      await updateProduct(productId, {
-        ...created,
-        images: newUrls,
-        categoryId: created.category?.id,
-      });
       alert("Product created.");
     }
 
     setSelectedProduct(null);
     loadProducts();
   };
+
 
   return (
     <div className="admin-container">

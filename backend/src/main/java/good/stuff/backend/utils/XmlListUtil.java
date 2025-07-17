@@ -1,7 +1,5 @@
 package good.stuff.backend.utils;
 
-import good.stuff.backend.common.dto.product.ProductImageDto;
-
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.*;
@@ -13,25 +11,26 @@ import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 import org.w3c.dom.*;
 import org.xml.sax.InputSource;
 
-public class ImageXmlUtil {
+public class XmlListUtil {
 
-    public static String toXml(List<ProductImageDto> images) {
+    public static <T> String toXml(List<T> items, String rootElementName, String itemElementName, Function<T, String> toStringFunction) {
         try {
             DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
 
             Document doc = docBuilder.newDocument();
-            Element rootElement = doc.createElement("imageurls");
+            Element rootElement = doc.createElement(rootElementName);
             doc.appendChild(rootElement);
 
-            for (ProductImageDto image : images) {
-                Element urlElement = doc.createElement("url");
-                urlElement.appendChild(doc.createTextNode(image.getImageUrl()));
-                rootElement.appendChild(urlElement);
+            for (T item : items) {
+                Element itemElement = doc.createElement(itemElementName);
+                itemElement.appendChild(doc.createTextNode(toStringFunction.apply(item)));
+                rootElement.appendChild(itemElement);
             }
 
             TransformerFactory transformerFactory = TransformerFactory.newInstance();
@@ -44,14 +43,14 @@ public class ImageXmlUtil {
 
             return writer.toString();
         } catch (Exception e) {
-            throw new RuntimeException("Error converting images to XML", e);
+            throw new RuntimeException("Error converting list to XML", e);
         }
     }
 
-    public static List<ProductImageDto> fromXml(String xml) {
-        List<ProductImageDto> images = new ArrayList<>();
+    public static <T> List<T> fromXml(String xml, String itemElementName, Function<String, T> fromStringFunction) {
+        List<T> items = new ArrayList<>();
         if (xml == null || xml.isEmpty()) {
-            return images;
+            return items;
         }
 
         try {
@@ -61,17 +60,17 @@ public class ImageXmlUtil {
             InputSource is = new InputSource(new StringReader(xml));
             Document doc = builder.parse(is);
 
-            NodeList urlNodes = doc.getElementsByTagName("url");
-            for (int i = 0; i < urlNodes.getLength(); i++) {
-                Node urlNode = urlNodes.item(i);
-                String urlText = urlNode.getTextContent();
-                images.add(new ProductImageDto(urlText));
+            NodeList nodes = doc.getElementsByTagName(itemElementName);
+            for (int i = 0; i < nodes.getLength(); i++) {
+                Node node = nodes.item(i);
+                String textContent = node.getTextContent();
+                items.add(fromStringFunction.apply(textContent));
             }
         } catch (Exception e) {
-            throw new RuntimeException("Error parsing images XML", e);
+            throw new RuntimeException("Error parsing XML", e);
         }
 
-        return images;
+        return items;
     }
 
     public static List<String> extractUrlStrings(String xml) {

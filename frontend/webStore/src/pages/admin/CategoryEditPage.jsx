@@ -7,8 +7,9 @@ import {
   getAllCategories,
   getAllProducts,
 } from "../../api/api";
+import { uploadCategoryImage } from "../../api/minioImageClient";
 
-function CategoryEditPage() {
+export default function CategoryEditPage() {
   const [categories, setCategories] = useState([]);
   const [selectedId, setSelectedId] = useState(null);
   const [name, setName] = useState("");
@@ -16,13 +17,15 @@ function CategoryEditPage() {
   const [loading, setLoading] = useState(false);
   const [hasProducts, setHasProducts] = useState(false);
 
-  // Load all categories
+  useEffect(() => {
+    loadCategories();
+  }, []);
+
   const loadCategories = async () => {
     const data = await getAllCategories();
     setCategories(data);
   };
 
-  // Load one category into form
   const loadCategory = async (id) => {
     setLoading(true);
     const data = await getCategoryById(id);
@@ -35,17 +38,12 @@ function CategoryEditPage() {
     setHasProducts(products.length > 0);
   };
 
-  // Clear form for new category
   const clearForm = () => {
     setSelectedId(null);
     setName("");
     setImageUrls([""]);
     setHasProducts(false);
   };
-
-  useEffect(() => {
-    loadCategories();
-  }, []);
 
   const handleChangeImage = (index, value) => {
     const updated = [...imageUrls];
@@ -57,6 +55,35 @@ function CategoryEditPage() {
     setImageUrls([...imageUrls, ""]);
   };
 
+  // New: Handle image file uploads
+  const handleImageUpload = async (e) => {
+    const files = e.target.files;
+    if (!files.length) return;
+
+    setLoading(true);
+    try {
+      const uploadedUrls = [];
+      // Use selectedId if editing, else just upload with temp id (adjust backend as needed)
+      const categoryId = selectedId || "temp-category";
+
+      for (const file of files) {
+        const url = await uploadCategoryImage(categoryId, file);
+        uploadedUrls.push(url);
+      }
+
+      setImageUrls((prev) => [
+        ...prev.filter((url) => url.trim() !== ""),
+        ...uploadedUrls,
+      ]);
+    } catch (error) {
+      alert("Error uploading images: " + error.message);
+    }
+    setLoading(false);
+
+    // Reset file input value so user can upload same file(s) again if needed
+    e.target.value = null;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -64,9 +91,7 @@ function CategoryEditPage() {
       name,
       imageUrls: imageUrls
         .filter((url) => url.trim() !== "")
-        .map((url) => ({
-          imageUrl: url,
-        })),
+        .map((url) => ({ imageUrl: url })),
     };
 
     if (selectedId) {
@@ -93,7 +118,7 @@ function CategoryEditPage() {
     if (categoryHasProducts) {
       if (
         !window.confirm(
-          "This category has products assigned to it. Deleting it will remove this association from those products. Are you sure you want to delete?"
+          "This category has products assigned to it. Deleting it will remove this association from those products. Are you sure?"
         )
       ) {
         return;
@@ -113,103 +138,107 @@ function CategoryEditPage() {
   };
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <div className="admin-container">Loading...</div>;
   }
 
   return (
-    <div className="page-container max-w-3xl mx-auto p-6 space-y-8">
-      <h2 className="section-title">Categories</h2>
+    <div className="admin-container">
+      <h1 className="admin-title">Category Management</h1>
 
-      {/* List of categories */}
-      <ul className="space-y-4">
+      {/* Category list grid */}
+      <div className="product-grid">
         {categories.map((cat) => (
-          <li
+          <div
             key={cat.id}
-            className={`border p-4 rounded shadow-sm flex justify-between items-center ${
-              selectedId === cat.id ? "bg-gray-100" : ""
+            className={`product-card ${
+              selectedId === cat.id ? "selected-card" : ""
             }`}
           >
             <div>
-              <h3 className="font-semibold">{cat.name}</h3>
+              <h3 className="product-name">{cat.name}</h3>
               {cat.imageUrls && cat.imageUrls.length > 0 && (
-                <div className="flex space-x-2 mt-2">
+                <div className="image-row">
                   {cat.imageUrls.map((img, idx) => (
                     <img
                       key={idx}
                       src={img.imageUrl}
                       alt={`Category ${cat.name} ${idx + 1}`}
-                      className="h-12 w-12 object-cover rounded"
+                      className="product-image-small"
                     />
                   ))}
                 </div>
               )}
             </div>
-            <div className="flex gap-2">
+            <div className="product-actions">
               <button
+                className="btn btn-edit"
                 onClick={() => loadCategory(cat.id)}
-                className="btn btn-sm btn-outline"
               >
                 Edit
               </button>
               <button
+                className="btn btn-delete"
                 onClick={() => handleDelete(cat.id)}
-                className="btn btn-sm btn-danger"
               >
                 Delete
               </button>
             </div>
-          </li>
+          </div>
         ))}
-      </ul>
+      </div>
 
-      <hr />
-
-      {/* Create / Edit form */}
-      <div>
-        <h3 className="text-xl font-semibold mb-4">
-          {selectedId ? "Edit Category" : "Add New Category"}
-        </h3>
-        <form
-          onSubmit={handleSubmit}
-          className="glass-card flex flex-col gap-5 p-6 max-w-md"
-        >
-          <div>
-            <label className="block font-semibold mb-2">Name</label>
+      {/* Form section */}
+      <div className="centered form-section">
+        <h2>{selectedId ? "Edit Category" : "Add New Category"}</h2>
+        <form onSubmit={handleSubmit} className="form-card">
+          <label className="form-label">
+            Name
             <input
-              className="input w-full"
+              type="text"
+              className="input"
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
               placeholder="Category name"
             />
-          </div>
-          <div>
-            <label className="block font-semibold mb-2">Images</label>
+          </label>
+
+          <label className="form-label">
+            Images
             {imageUrls.map((url, idx) => (
               <input
                 key={idx}
-                className="input mb-3 w-full"
+                className="input mb-2"
                 value={url}
                 onChange={(e) => handleChangeImage(idx, e.target.value)}
                 placeholder="Image URL"
               />
             ))}
+            {/* File input for uploading images */}
+            <input
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={handleImageUpload}
+              className="mb-2"
+            />
             <button
               type="button"
-              className="btn btn-sm btn-secondary mb-4"
+              className="btn btn-secondary"
               onClick={handleAddImage}
             >
-              Add Image
+              Add Image URL Manually
             </button>
-          </div>
-          <div className="flex gap-4">
-            <button type="submit" className="btn btn-primary flex-grow">
+          </label>
+
+          <div className="form-buttons">
+            <button type="submit" className="btn btn-primary" disabled={loading}>
               {selectedId ? "Update" : "Create"} Category
             </button>
             {selectedId && (
               <button
                 type="button"
-                className="btn btn-danger flex-grow"
+                className="btn btn-danger"
                 onClick={() => handleDelete(selectedId)}
               >
                 Delete Category
@@ -217,8 +246,9 @@ function CategoryEditPage() {
             )}
             <button
               type="button"
-              className="btn btn-outline flex-grow"
+              className="btn btn-outline"
               onClick={clearForm}
+              disabled={loading}
             >
               Clear Form
             </button>
@@ -228,5 +258,3 @@ function CategoryEditPage() {
     </div>
   );
 }
-
-export default CategoryEditPage;

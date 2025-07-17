@@ -314,6 +314,7 @@ textarea:focus {
 
 .page-container {
   padding: 2rem;
+  padding-top: 5rem;
 }
 
 .section-title {
@@ -622,4 +623,261 @@ input[type="range"]:focus::-moz-range-thumb {
   justify-content: flex-end;
   gap: 1rem;
   margin-top: 1rem;
+}
+
+/*----------------------------------------------------------*/
+
+.selected-card {
+  border: 2px solid #4f46e5;
+  /* highlight selected */
+}
+
+.product-name {
+  font-weight: 600;
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+}
+
+.image-row {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.product-image-small {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.btn-secondary {
+  background-color: #6b7280;
+  color: white;
+}
+
+.form-section {
+  margin-top: 2rem;
+}
+
+.form-card {
+  background: rgb(46, 46, 46);
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  max-width: 400px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.1);
+}
+
+.form-label {
+  font-weight: 600;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.input {
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.mb-2 {
+  margin-bottom: 0.5rem;
+}
+
+.form-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+}
+
+/*----------------------------------------------------------------------------*/
+
+.profile-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.profile-layout {
+  display: flex;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+/* Left: Profile info & addresses */
+.left-column {
+  flex: 2;
+  min-width: 600px;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* Right: Orders */
+.right-column {
+  flex: 3;
+  min-width: 300px;
+  max-height: 800px;
+  overflow-y: auto;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 1rem;
+}
+
+/* Glass section container */
+.section {
+  background: rgba(255, 255, 255, 0.03);
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.section h3 {
+  font-size: 1.3rem;
+  color: #00ffff;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 0.5rem;
+}
+
+/* Address card list */
+.address-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.address-card {
+  flex: 1 1 260px;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.02);
+  transition: all 0.2s ease;
+}
+
+.address-card:hover {
+  transform: scale(1.02);
+  border-color: #00ffff88;
+}
+
+/* Address Form */
+.address-form {
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(8px);
+  border-radius: 6px;
+  margin-top: 1rem;
+  max-width: 500px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.address-form input,
+.address-form select {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 0.6rem 1rem;
+  color: #f2f2f2;
+  border-radius: 0;
+  outline: none;
+}
+
+.address-form input:focus {
+  border-color: #00ffff;
+}
+
+.form-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+}
+
+/* Adjust buttons to match global .btn styling */
+.btn.btn-secondary {
+  background: transparent;
+  color: #aaa;
+  border: 1px solid #555;
+  transition: all 0.2s ease;
+}
+
+.btn.btn-secondary:hover {
+  background: transparent;
+  color: #bbbbbb;
+  border: 1px solid #666666;
+}
+
+.btn.btn-cancel {
+  border-color: #555;
+  color: #aaa;
+}
+
+.btn.btn-primary {
+  background: #00ffff;
+  color: #0a0a0a;
+  border: none;
+}
+
+.form-section {
+  margin-top: 2rem;
+}
+
+/* Selected state (highlighted) */
+.selected-card {
+  border: 2px solid #00ffffcc;
+}
+
+.user-order-item {
+  background: rgba(255, 255, 255, 0.03);
+  margin-top: 10px;
+}
+
+/*---------------------------------------------------------------------------------------------*/
+
+.checkout-layout {
+  display: flex;
+  gap: 2rem;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+/* Column widths */
+.checkout-left {
+  flex: 1;
+  min-width: 250px;
+}
+
+.checkout-center {
+  flex: 2;
+  min-width: 400px;
+}
+
+.checkout-right {
+  flex: 1;
+  min-width: 250px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.checkout-right .section:last-child {
+  padding-top: 0.5rem;
+}
+
+.price-checkout {
+  background: rgba(255, 255, 255, 0.03);
+  font-weight: bold;
+  font-size: 1.2rem;
+  padding: .2rem;
+  margin-top: .5rem;
+  border-left: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.q-checkout {
+  background: rgba(255, 255, 255, 0.03);
+  color: orange;
 }

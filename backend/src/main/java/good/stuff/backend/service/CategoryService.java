@@ -1,14 +1,18 @@
 package good.stuff.backend.service;
 
 import good.stuff.backend.common.dto.category.CategoryDto;
+import good.stuff.backend.common.dto.category.CategoryImageDto;
 import good.stuff.backend.common.model.category.Category;
 import good.stuff.backend.repository.CategoryRepository;
 import good.stuff.backend.utils.MapperUtils;
+import good.stuff.backend.utils.XmlListUtil;  // <-- Use generic util here
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 
 @Service
 public class CategoryService {
@@ -20,33 +24,93 @@ public class CategoryService {
         this.categoryRepository = categoryRepository;
     }
 
-    public CategoryDto createCategory(CategoryDto CategoryDto) {
-        Category categoryEntity = MapperUtils.map(CategoryDto, Category.class);
+    @Transactional
+    public CategoryDto createCategory(CategoryDto categoryDto) {
+        Category categoryEntity = MapperUtils.map(categoryDto, Category.class);
+
+        // Convert image DTO list to XML string before saving
+        if (categoryDto.getImageUrls() != null) {
+            categoryEntity.setImageUrls(XmlListUtil.toXml(
+                    categoryDto.getImageUrls(),
+                    "imageurls",
+                    "url",
+                    CategoryImageDto::getImageUrl
+            ));
+        }
+
         Category savedCategory = categoryRepository.save(categoryEntity);
-        return MapperUtils.map(savedCategory, CategoryDto.class);
+
+        CategoryDto resultDto = MapperUtils.map(savedCategory, CategoryDto.class);
+
+        // Parse XML string back to list for returning
+        resultDto.setImageUrls(XmlListUtil.fromXml(
+                savedCategory.getImageUrls(),
+                "url",
+                CategoryImageDto::new
+        ));
+
+        return resultDto;
     }
 
     public List<CategoryDto> getAllCategories() {
         List<Category> categories = categoryRepository.findAll();
         return categories.stream()
-                .map(category -> MapperUtils.map(category, CategoryDto.class))
+                .map(category -> {
+                    CategoryDto dto = MapperUtils.map(category, CategoryDto.class);
+                    dto.setImageUrls(XmlListUtil.fromXml(
+                            category.getImageUrls(),
+                            "url",
+                            CategoryImageDto::new
+                    ));
+                    return dto;
+                })
                 .toList();
     }
 
     public Optional<CategoryDto> getCategoryById(Long id) {
         Optional<Category> category = categoryRepository.findById(id);
-        return category.map(c -> MapperUtils.map(c, CategoryDto.class));
+        return category.map(c -> {
+            CategoryDto dto = MapperUtils.map(c, CategoryDto.class);
+            dto.setImageUrls(XmlListUtil.fromXml(
+                    c.getImageUrls(),
+                    "url",
+                    CategoryImageDto::new
+            ));
+            return dto;
+        });
     }
 
-    public CategoryDto updateCategory(Long id, CategoryDto CategoryDto) {
+    @Transactional
+    public CategoryDto updateCategory(Long id, CategoryDto categoryDto) {
         Optional<Category> existingCategoryOptional = categoryRepository.findById(id);
         if (existingCategoryOptional.isPresent()) {
             Category existingCategory = existingCategoryOptional.get();
 
-            MapperUtils.mapToExisting(CategoryDto, existingCategory);
+            // Map other fields first
+            MapperUtils.mapToExisting(categoryDto, existingCategory);
+
+            // Update imageUrls XML string
+            if (categoryDto.getImageUrls() != null) {
+                existingCategory.setImageUrls(XmlListUtil.toXml(
+                        categoryDto.getImageUrls(),
+                        "imageurls",
+                        "url",
+                        CategoryImageDto::getImageUrl
+                ));
+            } else {
+                existingCategory.setImageUrls(null);
+            }
 
             Category updatedCategory = categoryRepository.save(existingCategory);
-            return MapperUtils.map(updatedCategory, CategoryDto.class);
+
+            CategoryDto resultDto = MapperUtils.map(updatedCategory, CategoryDto.class);
+            resultDto.setImageUrls(XmlListUtil.fromXml(
+                    updatedCategory.getImageUrls(),
+                    "url",
+                    CategoryImageDto::new
+            ));
+
+            return resultDto;
         }
         return null;
     }

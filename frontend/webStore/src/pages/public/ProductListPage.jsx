@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { getAllProducts, getAllCategories, addToCart } from "../../api/api";
 
+import SearchBar from "../../components/SearchBar";
 import FiltersPanel from "../../components/FiltersPanel";
 import ProductCard from "../../components/ProductCard";
 import Spinner from "../../components/Spinner";
@@ -12,6 +13,7 @@ export default function ProductListPage() {
     categoryId: "",
     priceMin: 0,
     priceMax: 1000,
+    searchText: "",
   });
   const [loading, setLoading] = useState(false);
 
@@ -33,6 +35,7 @@ export default function ProductListPage() {
     setLoading(true);
     const timeoutId = setTimeout(() => setLoading(false), 10000);
     try {
+      // Pass filters including searchText to backend
       const data = await getAllProducts(filters);
       setProducts(data);
     } catch (err) {
@@ -73,17 +76,28 @@ export default function ProductListPage() {
     const { name, value } = e.target;
     setFilters((prev) => ({
       ...prev,
-      [name]: name === "priceMin" || name === "priceMax" ? Number(value) : value,
+      [name]:
+        name === "priceMin" || name === "priceMax"
+          ? Number(value)
+          : value,
     }));
   };
 
   const resetFilters = () => {
-    setFilters({ categoryId: "", priceMin: 0, priceMax: 1000 });
+    setFilters({ categoryId: "", priceMin: 0, priceMax: 1000, searchText: "" });
   };
 
   return (
     <div className="page-container">
-      <h1 className="section-title">Product List</h1>
+
+
+      {/* New Search Bar */}
+      <SearchBar
+        categories={categories}
+        filters={filters}
+        onChange={handleFilterChange}
+      />
+
       <div className="product-layout">
         <FiltersPanel
           filters={filters}

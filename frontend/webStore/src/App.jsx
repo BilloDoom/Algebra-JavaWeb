@@ -12,16 +12,19 @@ import AdminLogsPage from "./pages/admin/LogsPage";
 import CartPage from "./pages/CartPage";
 import CheckoutPage from "./pages/CheckoutPage";
 import RequireAuth from "./auth/RequireAuth";
+import HomePage from "./pages/public/HomePage";
 
 function App() {
   return (
     <BrowserRouter>
       <div style={{ display: "flex" }}>
         <NavBar />
-        <div style={{ flex: 1, paddingTop: "1.5rem" }}>
+        <div style={{ flex: 1}}>
 
           <Routes>
             {/* Public Routes */}
+            <Route path="/home" element={<HomePage />} />
+
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/profile" element={<RequireAuth><ProfilePage /></RequireAuth>} />
@@ -29,7 +32,7 @@ function App() {
             <Route path="/products" element={<ProductListPage />} />
             <Route path="/products/:id" element={<ProductDetailsPage />} />
 
-            <Route path="/categories" element={<CategoryListPage />} />
+            {/*<Route path="/categories" element={<CategoryListPage />} />*/}
 
             <Route path="/cart" element={<CartPage />} />
             <Route path="/checkout" element={<RequireAuth><CheckoutPage /></RequireAuth>} />
